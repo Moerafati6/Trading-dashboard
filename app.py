@@ -7,7 +7,7 @@ st.set_page_config(page_title="Systematic Trading Interface", layout="wide")
 # =====================================================
 # CONFIGURATION - CLEAN ROOT LINK ONLY
 # =====================================================
-API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com/"
+API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 
 st.title("⚡ Systematic Trading Engine Dashboard")
 st.markdown("Real-time trend confluences, macro regimes, and dynamic ATR trailing stops.")
