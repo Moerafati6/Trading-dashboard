@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 import pandas as pd
+import plotly.graph_objects as go
 
 st.set_page_config(page_title="Systematic Behavioral Dashboard", layout="wide")
 
-# CRITICAL: Hardcoded link directly to your running Render web backend root domain
 API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 
 st.title("🧠 Behavioral Finance & Systematic Portfolio Matrix")
@@ -14,7 +14,6 @@ st.markdown("Analyzing institutional money flows, dynamic volatility boundaries,
 st.sidebar.header("Strategy Configurations")
 mode = st.sidebar.selectbox("Select Portfolio Risk Profile", ["Consistent", "Aggressive"])
 
-# Trigger Backend Data Harvest
 if st.sidebar.button("Execute Data Sync"):
     st.cache_data.clear()
 
@@ -25,7 +24,7 @@ try:
     if response.status_code == 200:
         payload = response.json()
         
-        # 1. Visualizing the Crowd Psychology Layer
+        # 1. Collective Market Psychology Status
         score = payload.get("sentiment_score", 50)
         classification = payload.get("sentiment_class", "Neutral")
         
@@ -56,29 +55,61 @@ try:
         with col3:
             st.metric(label="Active Asset Monitored Count", value=len(payload['assets']))
             
-        # 3. Dynamic Technical & Psychological Data Grid
+        # 3. Dynamic Data Grid
         st.subheader("⚡ Systematic Asset Matrix")
         df_assets = pd.DataFrame(payload['assets'])
         
-        # Reordering columns to prioritize behavioral indicators beautifully
-        df_assets = df_assets[[
+        df_assets_display = df_assets[[
             "ticker", "current_price", "regime", "action", 
             "stop_level", "backtest_return_pct", "metrics_sharpe", "behavioral_bias"
-        ]]
+        ]].copy()
         
-        # Clean formatting definitions for UI display
-        df_assets.columns = [
+        df_assets_display.columns = [
             "Asset Ticker", "Current Price", "Institutional Regime", 
             "System Action", "ATR Stop Level", "Backtest Return", "Sharpe Ratio", "Psychological/Behavioral Bias Insight"
         ]
         
-        st.dataframe(df_assets.style.format({
+        st.dataframe(df_assets_display.style.format({
             "Current Price": "${:.2f}",
             "ATR Stop Level": "${:.2f}",
             "Backtest Return": "{:.1f}%",
             "Sharpe Ratio": "{:.2f}"
         }), use_container_width=True)
         
+        st.markdown("---")
+        
+        # 4. Phase 1 Addition: Visual Engine Deep Dive
+        st.subheader("📈 Interactive Behavioral Charting Room")
+        target_ticker = st.selectbox("Select Asset to Map Visually", df_assets["ticker"].tolist())
+        
+        # Find selected row parameters
+        asset_data = df_assets[df_assets["ticker"] == target_ticker].iloc[0]
+        
+        # Create a beautiful, production-grade visual analytics box
+        fig = go.Figure()
+        
+        # Current Value Anchor
+        fig.add_trace(go.Scatter(
+            x=["Current Price", "Risk Stop Boundary"],
+            y=[asset_data["current_price"], asset_data["stop_level"]],
+            mode="markers+text+lines",
+            text=[f"${asset_data['current_price']}", f"${asset_data['stop_level']}"],
+            textposition="top center",
+            marker=dict(color=["#00FFCC", "#FF3366"], size=[15, 15]),
+            line=dict(color="#444444", width=2, dash="dash"),
+            name="System Parameters"
+        ))
+        
+        fig.update_layout(
+            title=f"Risk Corridor Mapping for {target_ticker} (Action: {asset_data['action']})",
+            template="plotly_dark",
+            height=400,
+            yaxis=dict(title="Price Level ($)"),
+            showlegend=False
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.info(f"💡 Visual Insight: {asset_data['behavioral_bias']}")
+        
 except Exception as e:
     st.error(f"Failed to bridge pipeline to backend server.")
-    st.info("Ensure your Render engine has finished initializing and that Line 11 matches your running domain.")
