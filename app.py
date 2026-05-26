@@ -25,7 +25,7 @@ try:
     if "error" in data:
         st.error(f"Backend Processing Error: {data['error']}")
     else:
-        # Safe metric extraction (prevents KeyError crashes)
+        # Safe metric extraction
         avg_return = data.get('avg_portfolio_return_pct', data.get('portfolio_average_return', '0.0'))
         atr_mult = data.get('atr_multiplier', data.get('atr_stop_multiplier', 'N/A'))
         assets_list = data.get('assets', [])
@@ -43,22 +43,26 @@ try:
         st.subheader("🎯 Active Execution Signals")
         
         if assets_list:
-            df = pd.DataFrame(assets_list)
+            # 1. Force the creation of the dataframe immediately
+            raw_df = pd.DataFrame(assets_list)
             
-            # Dynamically handle column alignment to prevent formatting crashes
-            all_cols = df.columns.tolist()
-            column_order = [c for c in ["ticker", "regime", "action", "current_price", "stop_level", "backtest_return_pct", "metrics_sharpe"] if c in all_cols]
+            # 2. Check which columns actually exist from the API response
+            all_cols = raw_df.columns.tolist()
+            desired_order = ["ticker", "regime", "action", "current_price", "stop_level", "backtest_return_pct", "metrics_sharpe"]
+            column_order = [c for c in desired_order if c in all_cols]
             
-            df = df[column_order]
+            # 3. Create the final clean dataframe safely
+            df = raw_df[column_order].copy()
             
             def highlight_matrix(val):
-                if "LONG" in str(val):
+                val_str = str(val).upper()
+                if "LONG" in val_str:
                     return 'background-color: #d4edda; color: #155724; font-weight: bold;'
-                elif "SHORT" in str(val):
+                elif "SHORT" in val_str:
                     return 'background-color: #f8d7da; color: #721c24; font-weight: bold;'
-                elif "BULL" in str(val):
+                elif "BULL" in val_str:
                     return 'color: #28a745; font-weight: bold;'
-                elif "BEAR" in str(val):
+                elif "BEAR" in val_str:
                     return 'color: #dc3545; font-weight: bold;'
                 return ''
 
@@ -67,5 +71,5 @@ try:
             st.info("No active assets found in this portfolio basket stream.")
         
 except Exception as e:
-    st.error("🔴 Connection Interrupted: Unable to contact the cloud trading engine server.")
+    st.error(f"🔴 Streamlit Layout Error: {str(e)}")
     st.info("Ensure your Google Colab notebook cell is still actively running and hasn't timed out.")
