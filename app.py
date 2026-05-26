@@ -5,13 +5,11 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Systematic Behavioral Dashboard", layout="wide")
 
-# Permanent backend API link connected directly to your running Render web service
 API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 
 st.title("🧠 Behavioral Finance & Systematic Portfolio Matrix")
 st.markdown("Analyzing institutional money flows, dynamic volatility boundaries, and collective crowd psychology.")
 
-# Sidebar Configuration Controls
 st.sidebar.header("Strategy Configurations")
 mode = st.sidebar.selectbox("Select Portfolio Risk Profile", ["Consistent", "Aggressive"])
 
@@ -46,7 +44,7 @@ try:
         st.progress(score / 100)
         st.markdown("---")
         
-        # 2. Portfolio Summary Architecture Metrics
+        # 2. Portfolio Summary Performance Metrics
         st.subheader("📋 Portfolio System Performance")
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -56,7 +54,7 @@ try:
         with col3:
             st.metric(label="Active Asset Monitored Count", value=len(payload['assets']))
             
-        # 3. Dynamic Technical & Psychological Data Grid
+        # 3. Dynamic Technical Data Grid
         st.subheader("⚡ Systematic Asset Matrix")
         df_assets = pd.DataFrame(payload['assets'])
         
@@ -79,59 +77,44 @@ try:
         
         st.markdown("---")
         
-        # 4. Enhanced Visual Corridor Engine Deep Dive (No Slanted Lines)
+        # 4. Phase 1 Production Update: Candlestick Visual Room
         st.subheader("📈 Interactive Behavioral Charting Room")
         target_ticker = st.selectbox("Select Asset to Map Visually", df_assets["ticker"].tolist())
         
-        # Extract row properties for selected asset
+        # Extract timeline historical lists for selected asset
         asset_data = df_assets[df_assets["ticker"] == target_ticker].iloc[0]
-        cp = asset_data["current_price"]
-        sl = asset_data["stop_level"]
+        hist = asset_data["history"]
         
         fig = go.Figure()
         
-        # Flat Line 1: Current Price Threshold
-        fig.add_trace(go.Scatter(
-            x=["Structural Baseline", "Current Market Price Spot"],
-            y=[cp, cp],
-            mode="lines+markers+text",
-            text=["", f"Current Spot: ${cp:.2f}"],
-            textposition="top left",
-            line=dict(color="#00FFCC", width=4),
-            marker=dict(size=12, color="#00FFCC"),
-            name="Current Price"
+        # Trace 1: Professional Financial Candlesticks
+        fig.add_trace(go.Candlestick(
+            x=hist["dates"],
+            open=hist["open"],
+            high=hist["high"],
+            low=hist["low"],
+            close=hist["close"],
+            increasing_line_color="#00FFCC", 
+            decreasing_line_color="#FF3366",
+            name="Price Candle"
         ))
         
-        # Flat Line 2: Dynamic ATR Trailing Risk Floor
+        # Trace 2: Rolling Volatility Trailing Stop Line Floor
         fig.add_trace(go.Scatter(
-            x=["Structural Baseline", "Current Market Price Spot"],
-            y=[sl, sl],
-            mode="lines+markers+text",
-            text=["", f"Risk Stop Floor: ${sl:.2f}"],
-            textposition="bottom left",
-            line=dict(color="#FF3366", width=3, dash="dash"),
-            marker=dict(size=12, color="#FF3366"),
-            name="ATR Risk Boundary"
+            x=hist["dates"],
+            y=hist["stop_line"],
+            mode="lines",
+            line=dict(color="#FFFF00", width=2, dash="dot"),
+            name="ATR Trailing Stop"
         ))
-        
-        # Add a shading block showing the literal corridor of acceptable volatility
-        fig.add_hrect(
-            y0=min(cp, sl), y1=max(cp, sl),
-            fillcolor="rgba(0, 255, 204, 0.04)", line_width=0,
-            annotation_text="Volatility Protection Envelope", annotation_position="top left"
-        )
         
         fig.update_layout(
-            title=f"Risk Corridor Mapping: {target_ticker} ({asset_data['action']})",
+            title=f"30-Day Rolling Candlestick & Systematic Risk Corridor: {target_ticker}",
             template="plotly_dark",
-            height=400,
-            yaxis=dict(
-                title="Asset Price Unit ($)", 
-                range=[min(cp, sl) * 0.92, max(cp, sl) * 1.08], 
-                tickformat=".2f"
-            ),
-            xaxis=dict(showgrid=False),
-            showlegend=False
+            height=450,
+            xaxis=dict(rangeslider_visible=False, type="category"),
+            yaxis=dict(title="Price Level ($)", tickformat=".2f"),
+            margin=dict(l=40, r=40, t=40, b=40)
         )
         
         st.plotly_chart(fig, use_container_width=True)
