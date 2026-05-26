@@ -305,4 +305,4 @@ try:
 except Exception as e:
     st.error(f"Failed to bridge pipeline to backend server.")
     st.info("Check that your Render backend has fully completed its deployment process.")
-Click "Commit changes" at the bottom of GitHub.
+
