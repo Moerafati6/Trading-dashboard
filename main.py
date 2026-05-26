@@ -16,7 +16,6 @@ app.add_middleware(
 )
 
 def get_crowd_sentiment():
-    """Fetches real-time crowd sentiment data to map market psychology."""
     try:
         response = requests.get("https://api.alternative.me/fng/?limit=1", timeout=5)
         if response.status_code == 200:
@@ -63,7 +62,6 @@ def calculate_signals(tickers, mode_name):
             current_price = round(float(data['Close'].iloc[-1]), 2)
             last_row = data.iloc[-1]
             
-            # Institutional Trend Framework
             regime = "BULL" if last_row["Close"] > last_row["MA200"] else "BEAR"
             fast_signal = 1 if last_row["MA5"] > last_row["MA20"] else -1
             slow_signal = 1 if last_row["MA10"] > last_row["MA50"] else -1
@@ -75,12 +73,14 @@ def calculate_signals(tickers, mode_name):
             else:
                 action = "WAIT / NO SIGNAL"
                 
-            atr_val = last_row["ATR"]
+            # Compute rolling history array of the ATR stop line for visualization
             if "LONG" in action:
-                stop_level = round(current_price - (atr_val * atr_multiplier), 2)
+                data["Stop_History"] = data["Close"] - (data["ATR"] * atr_multiplier)
             else:
-                stop_level = round(current_price + (atr_val * atr_multiplier), 2)
+                data["Stop_History"] = data["Close"] + (data["ATR"] * atr_multiplier)
                 
+            stop_level = round(float(data["Stop_History"].iloc[-1]), 2)
+            
             # Historical Simulation Loop (1-Year Backtest)
             data['Strategy_Return'] = 0.0
             pos, entry, trades = 0, 0, []
@@ -117,13 +117,23 @@ def calculate_signals(tickers, mode_name):
             daily_std = data['Strategy_Return'].std()
             sharpe_ratio = round((daily_mean / daily_std) * np.sqrt(252), 2) if daily_std > 0 else 0.0
             
-            # Psychological Overreaction Analysis (Combining Sentiment + Trend)
             if regime == "BEAR" and sentiment["value"] <= 25:
                 bias_insight = "Capitulation Phase: Crowd is panic selling into institutional support."
             elif regime == "BULL" and sentiment["value"] >= 75:
                 bias_insight = "Retail FOMO: Mass overconfidence. Trailing stops should be tightened."
             else:
                 bias_insight = f"Normal herd distribution in an institutional {regime} cycle."
+
+            # Package up the last 30 intervals of timeline tracking points
+            recent_data = data.tail(30)
+            chart_history = {
+                "dates": recent_data.index.strftime('%Y-%m-%d').tolist(),
+                "open": recent_data["Open"].round(2).tolist(),
+                "high": recent_data["High"].round(2).tolist(),
+                "low": recent_data["Low"].round(2).tolist(),
+                "close": recent_data["Close"].round(2).tolist(),
+                "stop_line": recent_data["Stop_History"].round(2).tolist()
+            }
 
             total_return += actual_return_pct
             valid_assets_count += 1
@@ -136,7 +146,8 @@ def calculate_signals(tickers, mode_name):
                 "stop_level": stop_level,
                 "backtest_return_pct": actual_return_pct,
                 "metrics_sharpe": sharpe_ratio,
-                "behavioral_bias": bias_insight
+                "behavioral_bias": bias_insight,
+                "history": chart_history
             })
         except Exception:
             continue
@@ -164,3 +175,134 @@ def get_signals(mode: str = "consistent"):
         tickers = ["BTC-USD", "XRP-USD", "SOL-USD", "DOGE-USD", "AAVE-USD", "AVAX-USD"]
         
     return calculate_signals(tickers, mode_lower)
+Click "Commit changes" at the bottom of the page. Give Render about 60 seconds to finish compiling the updated endpoints.
+
+Step 2: Update your Frontend (app.py)
+Now we want the frontend UI to parse that timeline data block and map high-end financial candles. Go to app.py on GitHub, click the Pencil Icon to edit, select all code, and replace it completely with this:
+
+import streamlit as st
+import requests
+import pandas as pd
+import plotly.graph_objects as go
+
+st.set_page_config(page_title="Systematic Behavioral Dashboard", layout="wide")
+
+API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
+
+st.title("🧠 Behavioral Finance & Systematic Portfolio Matrix")
+st.markdown("Analyzing institutional money flows, dynamic volatility boundaries, and collective crowd psychology.")
+
+st.sidebar.header("Strategy Configurations")
+mode = st.sidebar.selectbox("Select Portfolio Risk Profile", ["Consistent", "Aggressive"])
+
+if st.sidebar.button("Execute Data Sync"):
+    st.cache_data.clear()
+
+try:
+    with st.spinner("Fetching active systematic signals and emotional indices from Render cloud..."):
+        response = requests.get(f"{API_BASE_URL}/signals?mode={mode.lower()}", timeout=15)
+        
+    if response.status_code == 200:
+        payload = response.json()
+        
+        # 1. Collective Market Psychology Status Window
+        score = payload.get("sentiment_score", 50)
+        classification = payload.get("sentiment_class", "Neutral")
+        
+        st.subheader("📊 Collective Market Psychology Status")
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            st.metric(label="Global Crowd Sentiment Index", value=f"{score} / 100")
+        with col_s2:
+            st.metric(label="Emotional Classification", value=str(classification).upper())
+        with col_s3:
+            if score <= 25:
+                st.warning("⚠️ Market State: EXTREME FEAR (High Accumulation Opportunity)")
+            elif score >= 75:
+                st.error("🚨 Market State: EXTREME GREED (High Overbought Risk)")
+            else:
+                st.success("✅ Market State: Rational Distribution")
+                
+        st.progress(score / 100)
+        st.markdown("---")
+        
+        # 2. Portfolio Summary Performance Metrics
+        st.subheader("📋 Portfolio System Performance")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric(label="Strategy Mean Portfolio Return", value=f"{payload['avg_portfolio_return_pct']}%")
+        with col2:
+            st.metric(label="Dynamic ATR Trailing Multiplier", value=f"{payload['atr_stop_multiplier']}x")
+        with col3:
+            st.metric(label="Active Asset Monitored Count", value=len(payload['assets']))
+            
+        # 3. Dynamic Technical Data Grid
+        st.subheader("⚡ Systematic Asset Matrix")
+        df_assets = pd.DataFrame(payload['assets'])
+        
+        df_assets_display = df_assets[[
+            "ticker", "current_price", "regime", "action", 
+            "stop_level", "backtest_return_pct", "metrics_sharpe", "behavioral_bias"
+        ]].copy()
+        
+        df_assets_display.columns = [
+            "Asset Ticker", "Current Price", "Institutional Regime", 
+            "System Action", "ATR Stop Level", "Backtest Return", "Sharpe Ratio", "Psychological/Behavioral Bias Insight"
+        ]
+        
+        st.dataframe(df_assets_display.style.format({
+            "Current Price": "${:.2f}",
+            "ATR Stop Level": "${:.2f}",
+            "Backtest Return": "{:.1f}%",
+            "Sharpe Ratio": "{:.2f}"
+        }), use_container_width=True)
+        
+        st.markdown("---")
+        
+        # 4. Phase 1 Production Update: Candlestick Visual Room
+        st.subheader("📈 Interactive Behavioral Charting Room")
+        target_ticker = st.selectbox("Select Asset to Map Visually", df_assets["ticker"].tolist())
+        
+        # Extract timeline historical lists for selected asset
+        asset_data = df_assets[df_assets["ticker"] == target_ticker].iloc[0]
+        hist = asset_data["history"]
+        
+        fig = go.Figure()
+        
+        # Trace 1: Professional Financial Candlesticks
+        fig.add_trace(go.Candlestick(
+            x=hist["dates"],
+            open=hist["open"],
+            high=hist["high"],
+            low=hist["low"],
+            close=hist["close"],
+            increasing_line_color="#00FFCC", 
+            decreasing_line_color="#FF3366",
+            name="Price Candle"
+        ))
+        
+        # Trace 2: Rolling Volatility Trailing Stop Line Floor
+        fig.add_trace(go.Scatter(
+            x=hist["dates"],
+            y=hist["stop_line"],
+            mode="lines",
+            line=dict(color="#FFFF00", width=2, dash="dot"),
+            name="ATR Trailing Stop"
+        ))
+        
+        fig.update_layout(
+            title=f"30-Day Rolling Candlestick & Systematic Risk Corridor: {target_ticker}",
+            template="plotly_dark",
+            height=450,
+            xaxis=dict(rangeslider_visible=False, type="category"),
+            yaxis=dict(title="Price Level ($)", tickformat=".2f"),
+            margin=dict(l=40, r=40, t=40, b=40)
+        )
+        
+        st.plotly_chart(fig, use_container_width=True)
+        st.info(f"💡 Behavioral Analysis: {asset_data['behavioral_bias']}")
+        
+except Exception as e:
+    st.error(f"Failed to bridge pipeline to backend server.")
+    st.info("Check that your Render backend has fully completed its deployment process.")
+Click "Commit changes" at the bottom of GitHub.
