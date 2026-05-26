@@ -43,33 +43,18 @@ try:
         st.subheader("🎯 Active Execution Signals")
         
         if assets_list:
-            # 1. Force the creation of the dataframe immediately
             raw_df = pd.DataFrame(assets_list)
-            
-            # 2. Check which columns actually exist from the API response
             all_cols = raw_df.columns.tolist()
             desired_order = ["ticker", "regime", "action", "current_price", "stop_level", "backtest_return_pct", "metrics_sharpe"]
             column_order = [c for c in desired_order if c in all_cols]
             
-            # 3. Create the final clean dataframe safely
             df = raw_df[column_order].copy()
             
-            def highlight_matrix(val):
-                val_str = str(val).upper()
-                if "LONG" in val_str:
-                    return 'background-color: #d4edda; color: #155724; font-weight: bold;'
-                elif "SHORT" in val_str:
-                    return 'background-color: #f8d7da; color: #721c24; font-weight: bold;'
-                elif "BULL" in val_str:
-                    return 'color: #28a745; font-weight: bold;'
-                elif "BEAR" in val_str:
-                    return 'color: #dc3545; font-weight: bold;'
-                return ''
-
-            st.dataframe(df.style.applymap(highlight_matrix), use_container_width=True, height=450)
+            # Barebones table display - completely immune to styling syntax changes
+            st.dataframe(df, use_container_width=True)
         else:
             st.info("No active assets found in this portfolio basket stream.")
         
 except Exception as e:
     st.error(f"🔴 Streamlit Layout Error: {str(e)}")
-    st.info("Ensure your Google Colab notebook cell is still actively running and hasn't timed out.")
+    st.info("Ensure your Google Colab notebook cell is still actively running.")
