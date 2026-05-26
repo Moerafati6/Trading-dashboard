@@ -2,59 +2,83 @@ import streamlit as st
 import requests
 import pandas as pd
 
-st.set_page_config(page_title="Systematic Trading Interface", layout="wide")
+st.set_page_config(page_title="Systematic Behavioral Dashboard", layout="wide")
 
-# =====================================================
-# CONFIGURATION - CLEAN ROOT LINK ONLY
-# =====================================================
+# CRITICAL: Hardcoded link directly to your running Render web backend root domain
 API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 
-st.title("⚡ Systematic Trading Engine Dashboard")
-st.markdown("Real-time trend confluences, macro regimes, and dynamic ATR trailing stops.")
-st.write("---")
+st.title("🧠 Behavioral Finance & Systematic Portfolio Matrix")
+st.markdown("Analyzing institutional money flows, dynamic volatility boundaries, and collective crowd psychology.")
 
-selected_mode = st.selectbox("Select Active Portfolio Basket:", ["Aggressive", "Consistent"])
+# Sidebar Configuration Controls
+st.sidebar.header("Strategy Configurations")
+mode = st.sidebar.selectbox("Select Portfolio Risk Profile", ["Consistent", "Aggressive"])
+
+# Trigger Backend Data Harvest
+if st.sidebar.button("Execute Data Sync"):
+    st.cache_data.clear()
 
 try:
-    mode = selected_mode.lower()
-    api_url = f"{API_BASE_URL}/signals?mode={mode}"
-    
-    response = requests.get(api_url, timeout=12)
-    data = response.json()
-    
-    if "error" in data:
-        st.error(f"Backend Processing Error: {data['error']}")
-    else:
-        # Safe metric extraction
-        avg_return = data.get('avg_portfolio_return_pct', data.get('portfolio_average_return', '0.0'))
-        atr_mult = data.get('atr_multiplier', data.get('atr_stop_multiplier', 'N/A'))
-        assets_list = data.get('assets', [])
+    with st.spinner("Fetching active systematic signals and emotional indices from Render cloud..."):
+        response = requests.get(f"{API_BASE_URL}/signals?mode={mode.lower()}", timeout=15)
         
-        # Render top metric summary cards
+    if response.status_code == 200:
+        payload = response.json()
+        
+        # 1. Visualizing the Crowd Psychology Layer
+        score = payload.get("sentiment_score", 50)
+        classification = payload.get("sentiment_class", "Neutral")
+        
+        st.subheader("📊 Collective Market Psychology Status")
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            st.metric(label="Global Crowd Sentiment Index", value=f"{score} / 100")
+        with col_s2:
+            st.metric(label="Emotional Classification", value=str(classification).upper())
+        with col_s3:
+            if score <= 25:
+                st.warning("⚠️ Market State: EXTREME FEAR (High Accumulation Opportunity)")
+            elif score >= 75:
+                st.error("🚨 Market State: EXTREME GREED (High Overbought Risk)")
+            else:
+                st.success("✅ Market State: Rational Distribution")
+                
+        st.progress(score / 100)
+        st.markdown("---")
+        
+        # 2. Portfolio Summary Architecture
+        st.subheader("📋 Portfolio System Performance")
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric(label="Average Portfolio Return", value=f"{avg_return}%")
+            st.metric(label="Strategy Mean Portfolio Return", value=f"{payload['avg_portfolio_return_pct']}%")
         with col2:
-            st.metric(label="ATR Stop Multiplier", value=f"{atr_mult}x")
+            st.metric(label="Dynamic ATR Trailing Multiplier", value=f"{payload['atr_stop_multiplier']}x")
         with col3:
-            st.metric(label="Total Tracked Assets", value=len(assets_list))
+            st.metric(label="Active Asset Monitored Count", value=len(payload['assets']))
             
-        st.write("###")
-        st.subheader("🎯 Active Execution Signals")
+        # 3. Dynamic Technical & Psychological Data Grid
+        st.subheader("⚡ Systematic Asset Matrix")
+        df_assets = pd.DataFrame(payload['assets'])
         
-        if assets_list:
-            raw_df = pd.DataFrame(assets_list)
-            all_cols = raw_df.columns.tolist()
-            desired_order = ["ticker", "regime", "action", "current_price", "stop_level", "backtest_return_pct", "metrics_sharpe"]
-            column_order = [c for c in desired_order if c in all_cols]
-            
-            df = raw_df[column_order].copy()
-            
-            # Barebones table display - completely immune to styling syntax changes
-            st.dataframe(df, use_container_width=True)
-        else:
-            st.info("No active assets found in this portfolio basket stream.")
+        # Reordering columns to prioritize behavioral indicators beautifully
+        df_assets = df_assets[[
+            "ticker", "current_price", "regime", "action", 
+            "stop_level", "backtest_return_pct", "metrics_sharpe", "behavioral_bias"
+        ]]
+        
+        # Clean formatting definitions for UI display
+        df_assets.columns = [
+            "Asset Ticker", "Current Price", "Institutional Regime", 
+            "System Action", "ATR Stop Level", "Backtest Return", "Sharpe Ratio", "Psychological/Behavioral Bias Insight"
+        ]
+        
+        st.dataframe(df_assets.style.format({
+            "Current Price": "${:.2f}",
+            "ATR Stop Level": "${:.2f}",
+            "Backtest Return": "{:.1f}%",
+            "Sharpe Ratio": "{:.2f}"
+        }), use_container_width=True)
         
 except Exception as e:
-    st.error(f"🔴 Streamlit Layout Error: {str(e)}")
-    st.info("Ensure your Google Colab notebook cell is still actively running.")
+    st.error(f"Failed to bridge pipeline to backend server.")
+    st.info("Ensure your Render engine has finished initializing and that Line 11 matches your running domain.")
