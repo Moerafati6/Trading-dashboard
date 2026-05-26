@@ -18,7 +18,7 @@ mode = st.selectbox("Select Active Portfolio Basket:", ["aggressive", "consisten
 
 try:
     # Connect directly to your live Ngrok data tunnel
-    api_url = f"{API_BASE_URL}/signals?mode={mode}"
+    api_url = f"{API_BASE_URL}/signals?mode={mode.lower()}"
     response = requests.get(api_url, timeout=12)
     data = response.json()
     
