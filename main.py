@@ -6,7 +6,6 @@ import numpy as np
 
 app = FastAPI(title="Systematic Trading Engine Backend")
 
-# Enable CORS so your Streamlit frontend can securely fetch data from Render
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,35 +19,52 @@ def calculate_signals(tickers, mode_name):
     total_return = 0.0
     valid_assets_count = 0
     
-    # Strategy settings based on selected basket tier
+    # Strategy risk parameters
     atr_multiplier = 1.5 if mode_name == "aggressive" else 2.5
     
     for ticker in tickers:
         try:
-            # Fetch historical daily market data
-            data = yf.Ticker(ticker).history(period="1mo")
-            if data.empty or len(data) < 5:
+            # Pull a full 1-year window to calculate legitimate historical returns and risk metrics
+            data = yf.Ticker(ticker).history(period="1y")
+            if data.empty or len(data) < 20:
                 continue
                 
             current_price = round(float(data['Close'].iloc[-1]), 2)
             
-            # Simple systematic trend calculation (Close vs 5-day Moving Average)
+            # 1. Trend Regime Logic (Close vs 5-Day Moving Average)
             ma5 = data['Close'].rolling(window=5).mean().iloc[-1]
             regime = "BULL" if current_price > ma5 else "BEAR"
             action = "LONG" if regime == "BULL" else "SHORT"
             
-            # Simple True Range calculation for dynamic trailing stops
+            # 2. Volatility Stop Logic (True Average True Range)
             high_low = data['High'] - data['Low']
-            atr = high_low.rolling(window=5).mean().iloc[-1]
-            atr_value = atr if not pd.isna(atr) else (current_price * 0.02)
+            high_close = np.abs(data['High'] - data['Close'].shift())
+            low_close = np.abs(data['Low'] - data['Close'].shift())
+            true_range = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+            atr = true_range.rolling(window=14).mean().iloc[-1]
             
-            stop_level = round(current_price - (atr_value * atr_multiplier), 2) if action == "LONG" else round(current_price + (atr_value * atr_multiplier), 2)
+            if action == "LONG":
+                stop_level = round(current_price - (atr * atr_multiplier), 2)
+            else:
+                stop_level = round(current_price + (atr * atr_multiplier), 2)
             
-            # Mock or calculated baseline performance historical metrics
-            backtest_return = round(float(np.random.uniform(-5.0, 15.0)), 1)
-            sharpe = round(float(np.random.uniform(0.8, 2.4)), 2)
+            # 3. REAL Historical Performance Math (1-Year Asset Return)
+            initial_price = data['Close'].iloc[0]
+            actual_return_pct = round(((current_price - initial_price) / initial_price) * 100, 1)
             
-            total_return += backtest_return
+            # 4. REAL Risk/Reward Math (Sharpe Ratio = Mean Return / Volatility)
+            # Calculate daily percentage updates
+            data['Daily_Return'] = data['Close'].pct_change()
+            mean_return = data['Daily_Return'].mean()
+            std_return = data['Daily_Return'].std()
+            
+            # Annualize the standard Sharpe formula (assuming 252 trading days and 0% risk-free rate)
+            if std_return > 0:
+                sharpe_ratio = round((mean_return / std_return) * np.sqrt(252), 2)
+            else:
+                sharpe_ratio = 0.0
+                
+            total_return += actual_return_pct
             valid_assets_count += 1
             
             assets_summary.append({
@@ -57,8 +73,8 @@ def calculate_signals(tickers, mode_name):
                 "action": action,
                 "current_price": current_price,
                 "stop_level": stop_level,
-                "backtest_return_pct": backtest_return,
-                "metrics_sharpe": sharpe
+                "backtest_return_pct": actual_return_pct,
+                "metrics_sharpe": sharpe_ratio
             })
         except Exception:
             continue
@@ -78,7 +94,6 @@ def root():
 @app.get("/signals")
 def get_signals(mode: str = "aggressive"):
     mode_lower = mode.lower()
-    # Define basket targets dynamically
     if mode_lower == "consistent":
         tickers = ["ZTS", "MU", "AAPL", "MSFT", "GOOGL"]
     else:
