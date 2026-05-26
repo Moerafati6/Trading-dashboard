@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="Systematic Behavioral Dashboard", layout="wide")
 
+# Permanent backend API link connected directly to your running Render web service
 API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 
 st.title("🧠 Behavioral Finance & Systematic Portfolio Matrix")
@@ -24,7 +25,7 @@ try:
     if response.status_code == 200:
         payload = response.json()
         
-        # 1. Collective Market Psychology Status
+        # 1. Collective Market Psychology Status Window
         score = payload.get("sentiment_score", 50)
         classification = payload.get("sentiment_class", "Neutral")
         
@@ -45,7 +46,7 @@ try:
         st.progress(score / 100)
         st.markdown("---")
         
-        # 2. Portfolio Summary Architecture
+        # 2. Portfolio Summary Architecture Metrics
         st.subheader("📋 Portfolio System Performance")
         col1, col2, col3 = st.columns(3)
         with col1:
@@ -55,7 +56,7 @@ try:
         with col3:
             st.metric(label="Active Asset Monitored Count", value=len(payload['assets']))
             
-        # 3. Dynamic Data Grid
+        # 3. Dynamic Technical & Psychological Data Grid
         st.subheader("⚡ Systematic Asset Matrix")
         df_assets = pd.DataFrame(payload['assets'])
         
@@ -78,38 +79,64 @@ try:
         
         st.markdown("---")
         
-        # 4. Phase 1 Addition: Visual Engine Deep Dive
+        # 4. Enhanced Visual Corridor Engine Deep Dive (No Slanted Lines)
         st.subheader("📈 Interactive Behavioral Charting Room")
         target_ticker = st.selectbox("Select Asset to Map Visually", df_assets["ticker"].tolist())
         
-        # Find selected row parameters
+        # Extract row properties for selected asset
         asset_data = df_assets[df_assets["ticker"] == target_ticker].iloc[0]
+        cp = asset_data["current_price"]
+        sl = asset_data["stop_level"]
         
-        # Create a beautiful, production-grade visual analytics box
         fig = go.Figure()
         
-        # Current Value Anchor
+        # Flat Line 1: Current Price Threshold
         fig.add_trace(go.Scatter(
-            x=["Current Price", "Risk Stop Boundary"],
-            y=[asset_data["current_price"], asset_data["stop_level"]],
-            mode="markers+text+lines",
-            text=[f"${asset_data['current_price']}", f"${asset_data['stop_level']}"],
-            textposition="top center",
-            marker=dict(color=["#00FFCC", "#FF3366"], size=[15, 15]),
-            line=dict(color="#444444", width=2, dash="dash"),
-            name="System Parameters"
+            x=["Structural Baseline", "Current Market Price Spot"],
+            y=[cp, cp],
+            mode="lines+markers+text",
+            text=["", f"Current Spot: ${cp:.2f}"],
+            textposition="top left",
+            line=dict(color="#00FFCC", width=4),
+            marker=dict(size=12, color="#00FFCC"),
+            name="Current Price"
         ))
         
+        # Flat Line 2: Dynamic ATR Trailing Risk Floor
+        fig.add_trace(go.Scatter(
+            x=["Structural Baseline", "Current Market Price Spot"],
+            y=[sl, sl],
+            mode="lines+markers+text",
+            text=["", f"Risk Stop Floor: ${sl:.2f}"],
+            textposition="bottom left",
+            line=dict(color="#FF3366", width=3, dash="dash"),
+            marker=dict(size=12, color="#FF3366"),
+            name="ATR Risk Boundary"
+        ))
+        
+        # Add a shading block showing the literal corridor of acceptable volatility
+        fig.add_hrect(
+            y0=min(cp, sl), y1=max(cp, sl),
+            fillcolor="rgba(0, 255, 204, 0.04)", line_width=0,
+            annotation_text="Volatility Protection Envelope", annotation_position="top left"
+        )
+        
         fig.update_layout(
-            title=f"Risk Corridor Mapping for {target_ticker} (Action: {asset_data['action']})",
+            title=f"Risk Corridor Mapping: {target_ticker} ({asset_data['action']})",
             template="plotly_dark",
             height=400,
-            yaxis=dict(title="Price Level ($)"),
+            yaxis=dict(
+                title="Asset Price Unit ($)", 
+                range=[min(cp, sl) * 0.92, max(cp, sl) * 1.08], 
+                tickformat=".2f"
+            ),
+            xaxis=dict(showgrid=False),
             showlegend=False
         )
         
         st.plotly_chart(fig, use_container_width=True)
-        st.info(f"💡 Visual Insight: {asset_data['behavioral_bias']}")
+        st.info(f"💡 Behavioral Analysis: {asset_data['behavioral_bias']}")
         
 except Exception as e:
     st.error(f"Failed to bridge pipeline to backend server.")
+    st.info("Check that your Render backend has fully completed its deployment process.")
