@@ -7,7 +7,7 @@ st.set_page_config(page_title="Systematic Trading Interface", layout="wide")
 # =====================================================
 # CONFIGURATION - PASTE YOUR LIVE NGROK URL HERE
 # =====================================================
-API_BASE_URL = "https://dipping-finite-edgy.ngrok-free.dev/signals?mode=aggressive"
+API_BASE_URL = "https://dipping-finite-edgy.ngrok-free.dev"
 
 st.title("⚡ Systematic Trading Engine Dashboard")
 st.markdown("Real-time trend confluences, macro regimes, and dynamic ATR trailing stops.")
