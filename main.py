@@ -10,39 +10,41 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 @app.get("/signals")
 async def get_signals(ticker: str):
     try:
-        # Force download with a more generous period
-        df = yf.download(ticker.upper(), period="2y", interval="1d", auto_adjust=True, progress=False)
+        # Use a more stable fetch method
+        ticker_obj = yf.Ticker(ticker.upper())
+        df = ticker_obj.history(period="1y")
         
-        # Log the length to your Render console to debug
-        print(f"DEBUG: Ticker {ticker} data length: {len(df)}")
+        # Check if the dataframe is actually populated
+        if df.empty or len(df) < 50:
+            return {"error": "Ticker not found or data empty"}
         
-        if df.empty:
-            return {"error": "Ticker not found or no data returned"}
-        
-        # Fill missing values to keep indicators moving even with short history
-        df = df.ffill()
-        
-        # Calculate indicators
+        # Standardize calculations
         last_close = float(df['Close'].iloc[-1])
         ma20 = float(df['Close'].rolling(window=20, min_periods=1).mean().iloc[-1])
         ma200 = float(df['Close'].rolling(window=200, min_periods=1).mean().iloc[-1])
         
-        # Metrics
+        # Calculate metrics using .iloc[-1] to ensure single values
         recent = df.tail(30)
-        psych = round(((last_close - float(recent['Low'].min())) / (float(recent['High'].max()) - float(recent['Low'].min()) + 0.01)) * 100, 0)
-        sharpe = round((df['Close'].pct_change().mean() / df['Close'].pct_change().std()) * np.sqrt(252), 2)
-        vol = round(df['Close'].pct_change().std() * np.sqrt(252), 4)
+        high = float(recent['High'].max())
+        low = float(recent['Low'].min())
+        psych = round(((last_close - low) / (high - low + 0.001)) * 100, 0)
+        
+        returns = df['Close'].pct_change().dropna()
+        sharpe = round((returns.mean() / returns.std()) * np.sqrt(252), 2)
+        vol = round(returns.std() * np.sqrt(252), 4)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
         
         regime = "BULL" if last_close > ma200 else "BEAR"
         action = "HOLD LONG" if (regime == "BULL" and last_close > ma20) else "HOLD SHORT"
         
         return {
-            "regime": regime, "action": action, "psych_score": float(psych),
-            "psych_meaning": "Greed" if psych >= 75 else "Panic" if psych <= 25 else "Neutral",
-            "sharpe": float(sharpe), "volatility": float(vol), "perf": float(perf),
+            "regime": regime,
+            "action": action,
+            "psych_score": float(psych),
+            "sharpe": float(sharpe),
+            "volatility": float(vol),
+            "perf": float(perf),
             "chart_data": df.tail(60).to_dict(orient='list')
         }
     except Exception as e:
-        print(f"DEBUG ERROR: {str(e)}")
         return {"error": str(e)}
