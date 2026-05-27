@@ -38,6 +38,7 @@ with st.sidebar:
 st.title("Nexus Quantitative Terminal")
 
 try:
+    # Public sentiment pulse
     response = requests.get(f"{API_BASE_URL}/signals?mode=consistent", timeout=30)
     if response.status_code == 200:
         data = response.json()
@@ -45,24 +46,26 @@ try:
         
         if st.session_state.auth:
             st.divider()
-            ticker = st.text_input("Search Institutional Asset", "AAPL").upper()
+            ticker = st.text_input("Search Any Asset (e.g., NVDA, TSLA, BTC-USD)", "AAPL").upper()
             if st.button("Scan Asset"):
-                res = requests.get(f"{API_BASE_URL}/signals?mode=aggressive", timeout=30).json()
-                # If you want to support ANY ticker, ensure your backend returns 
-                # data even for tickers outside your initial list.
-                asset = next((a for a in res['assets'] if a['ticker'] == ticker), None)
-                if asset:
+                # Pass the dynamic ticker to the backend
+                url = f"{API_BASE_URL}/signals?mode=aggressive&ticker={ticker}"
+                res = requests.get(url, timeout=30).json()
+                
+                if res.get('assets'):
+                    asset = res['assets'][0]
                     c1, c2, c3 = st.columns(3)
                     c1.metric("Regime", asset['regime'])
                     c2.metric("Action", asset['action'])
                     c3.metric("ATR Stop", f"${asset['stop_level']}")
                     
                     fig = go.Figure()
-                    fig.add_trace(go.Scatter(y=[asset['current_price'], asset['current_price']], name="Price"))
-                    fig.add_trace(go.Scatter(y=[asset['stop_level'], asset['stop_level']], name="Stop", line=dict(dash="dash")))
+                    fig.add_trace(go.Scatter(y=asset['history']['close'], name="Price"))
+                    fig.add_trace(go.Scatter(y=asset['history']['stop_line'], name="Stop", line=dict(dash="dash")))
                     st.plotly_chart(fig, use_container_width=True)
-                else: st.error("Ticker not found in institutional range.")
+                else: 
+                    st.error("Asset data unavailable. Ensure the ticker is correct.")
     else:
-        st.error(f"Backend returned status {response.status_code}")
+        st.error(f"Backend connection error (Status {response.status_code})")
 except Exception as e:
     st.error(f"Connection Error: {e}")
