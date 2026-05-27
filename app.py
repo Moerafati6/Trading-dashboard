@@ -3,7 +3,7 @@ import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.set_page_config(page_title="Nexus Institutional Terminal", layout="wide")
+st.set_page_config(page_title="Nexus Quantitative Terminal", layout="wide")
 API_BASE_URL = st.secrets["API_BASE_URL"]
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
