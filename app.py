@@ -8,8 +8,8 @@ st.set_page_config(page_title="Nexus Quantitative Terminal", layout="wide")
 # API Configuration
 API_BASE_URL = "https://trading-dashboard-u7pl.onrender.com"
 STRIPE_PAYMENT_LINK = "https://buy.stripe.com/dRm6oAe2b98GeLW8Mdcs800"
-SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co"
-SUPABASE_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY"
+SUPABASE_URL = "https://acjjbmtjouundpsbycue.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjampibXRqb3V1bmRwc2J5Y3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTMzNjYsImV4cCI6MjA5NTQyOTM2Nn0.FpkwT9sHXnT-Qj1v7c5ETFj9sKmAOal4oXsnWxfhyCk"
 
 # Session State
 if "premium_access" not in st.session_state:
