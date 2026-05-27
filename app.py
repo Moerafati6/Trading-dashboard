@@ -35,4 +35,4 @@ if st.button("Execute Scan"):
             st.plotly_chart(fig, use_container_width=True)
     except Exception as e:
         st.error(f"Connection Failed: {e}")
-Key fixes applied:
+
