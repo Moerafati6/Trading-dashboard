@@ -3,36 +3,39 @@ from fastapi.middleware.cors import CORSMiddleware
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import requests
 
 app = FastAPI(title="Nexus Institutional Quant Engine")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-def calculate_metrics(data):
-    # Psych Score (30-day relative strength)
-    recent = data.tail(30)
-    psych_score = round(((data['Close'].iloc[-1] - recent['Low'].min()) / (recent['High'].max() - recent['Low'].min())) * 100, 0)
-    # Sharpe Ratio
-    returns = data['Close'].pct_change().dropna()
-    sharpe = round((returns.mean() / returns.std()) * np.sqrt(252), 2)
-    # Return
-    total_return = round(((data['Close'].iloc[-1] / data['Close'].iloc[0]) - 1) * 100, 2)
-    return psych_score, sharpe, total_return
+def interpret_psych(score):
+    if score >= 75: return "Greed/Overbought: Tighten Stops"
+    if score <= 25: return "Panic/Oversold: Potential Support"
+    return "Neutral Institutional Flow"
 
 @app.get("/signals")
 def get_signals(ticker: str = "AAPL"):
     df = yf.download(ticker.upper(), period="1y", interval="1d", auto_adjust=True, progress=False)
-    if df.empty: return {"error": "Ticker not found"}
+    if df.empty: return {"error": "Invalid Ticker"}
     
     data = pd.DataFrame(index=df.index)
-    data["Open"], data["High"], data["Low"], data["Close"] = df["Open"], df["High"], df["Low"], df["Close"]
+    data[["Open", "High", "Low", "Close"]] = df[["Open", "High", "Low", "Close"]]
+    data["MA20"] = data["Close"].rolling(20).mean()
+    data["MA50"] = data["Close"].rolling(50).mean()
     data["MA200"] = data["Close"].rolling(200).mean()
     
-    psych, sharpe, ret = calculate_metrics(data)
+    # Quantitative Metrics
+    recent = data.tail(30)
+    psych = round(((data['Close'].iloc[-1] - recent['Low'].min()) / (recent['High'].max() - recent['Low'].min())) * 100, 0)
+    sharpe = round((data['Close'].pct_change().mean() / data['Close'].pct_change().std()) * np.sqrt(252), 2)
+    vol = round(data['Close'].pct_change().std() * np.sqrt(252), 4)
+    ret_pct = round(((data['Close'].iloc[-1] / data['Close'].iloc[0]) - 1) * 100, 2)
+    
     regime = "BULL" if data['Close'].iloc[-1] > data['MA200'].iloc[-1] else "BEAR"
+    action = "HOLD LONG" if (regime == "BULL" and data['Close'].iloc[-1] > data['MA20'].iloc[-1]) else "HOLD SHORT"
     
     return {
-        "ticker": ticker.upper(), "regime": regime, "psych_score": psych,
-        "sharpe": sharpe, "return_pct": ret, "current_price": round(float(data['Close'].iloc[-1]), 2),
-        "history": data.tail(30)[["Close"]].to_dict(orient='list')
+        "ticker": ticker.upper(), "regime": regime, "action": action,
+        "psych_score": psych, "psych_meaning": interpret_psych(psych),
+        "sharpe": sharpe, "return_pct": ret_pct, "volatility": vol,
+        "chart_data": data.tail(60).to_dict(orient='list')
     }
