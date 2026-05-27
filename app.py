@@ -12,7 +12,8 @@ def is_authorized(key):
     url = f"{SUPABASE_URL}/rest/v1/premium_keys?key_string=eq.{key}&is_active=eq.true"
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     try:
-        return requests.get(url, headers=headers).status_code == 200 and len(requests.get(url, headers=headers).json()) > 0
+        response = requests.get(url, headers=headers, timeout=10)
+        return response.status_code == 200 and len(response.json()) > 0
     except: return False
 
 if "auth" not in st.session_state: st.session_state.auth = False
@@ -24,8 +25,10 @@ with st.sidebar:
         if st.button("Unlock"):
             if is_authorized(key): st.session_state.auth = True; st.rerun()
             else: st.error("Invalid Key")
-        st.write("---")
-        st.link_button("7-Day Trial / Subscribe", "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801")
+        if st.button("Start 7-Day Free Trial"):
+            st.session_state.auth = True
+            st.rerun()
+        st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801")
     else:
         if st.button("Logout"): st.session_state.auth = False; st.rerun()
 
@@ -52,6 +55,3 @@ if st.session_state.auth:
             
         fig.update_layout(template="plotly_dark", xaxis_title="Time Intervals", yaxis_title="Price")
         st.plotly_chart(fig, use_container_width=True)
-else:
-    st.warning("Please unlock the terminal to access institutional data.")
-Should you add a 7-day free trial?
