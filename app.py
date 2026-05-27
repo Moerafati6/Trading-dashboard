@@ -3,7 +3,7 @@ import requests
 import plotly.graph_objects as go
 
 # 1. SETUP
-st.set_page_config(page_title="Nexus Institutional Terminal", layout="wide")
+st.set_page_config(page_title="Nexus Quantitative Terminal", layout="wide")
 
 # Secrets
 API_BASE_URL = st.secrets["API_BASE_URL"]
@@ -29,14 +29,13 @@ with st.sidebar:
         if st.button("Unlock"):
             if is_authorized(key): st.session_state.auth = True; st.rerun()
             else: st.error("Invalid Key")
-        # Updated with your new Stripe link
         st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801")
     else:
         st.success("Terminal Unlocked")
         if st.button("Logout"): st.session_state.auth = False; st.rerun()
 
 # 4. DATA FETCHING
-st.title("Nexus Institutional Terminal")
+st.title("Nexus Quantitative Terminal")
 
 try:
     response = requests.get(f"{API_BASE_URL}/signals?mode=consistent", timeout=30)
@@ -49,6 +48,8 @@ try:
             ticker = st.text_input("Search Institutional Asset", "AAPL").upper()
             if st.button("Scan Asset"):
                 res = requests.get(f"{API_BASE_URL}/signals?mode=aggressive", timeout=30).json()
+                # If you want to support ANY ticker, ensure your backend returns 
+                # data even for tickers outside your initial list.
                 asset = next((a for a in res['assets'] if a['ticker'] == ticker), None)
                 if asset:
                     c1, c2, c3 = st.columns(3)
