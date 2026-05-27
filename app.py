@@ -15,7 +15,6 @@ def is_authorized(key):
     headers = {"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"}
     url = f"{SUPABASE_URL}/rest/v1/premium_keys?key_string=eq.{key}&is_active=eq.true"
     try:
-        # Added timeout to auth check as well
         response = requests.get(url, headers=headers, timeout=10)
         return response.status_code == 200 and len(response.json()) > 0
     except: return False
@@ -30,8 +29,8 @@ with st.sidebar:
         if st.button("Unlock"):
             if is_authorized(key): st.session_state.auth = True; st.rerun()
             else: st.error("Invalid Key")
-        # Ensure this link is your ACTIVE Live Mode link from your dashboard
-        st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/dRm6oAe2b98GeLWBMdcs800")
+        # Updated with your new Stripe link
+        st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801")
     else:
         st.success("Terminal Unlocked")
         if st.button("Logout"): st.session_state.auth = False; st.rerun()
@@ -40,7 +39,6 @@ with st.sidebar:
 st.title("Nexus Institutional Terminal")
 
 try:
-    # Increased timeout to 30s to allow Render to 'wake up' from sleep
     response = requests.get(f"{API_BASE_URL}/signals?mode=consistent", timeout=30)
     if response.status_code == 200:
         data = response.json()
