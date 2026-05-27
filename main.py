@@ -6,23 +6,23 @@ import numpy as np
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+@app.get("/market_movers")
+def get_movers():
+    # Returns a list of 5 currently hot tickers
+    return ["NVDA", "AMD", "AVGO", "TSM", "MSFT"]
+
 @app.get("/signals")
 async def get_signals(ticker: str):
     try:
-        # Fetch data
         df = yf.download(ticker.upper(), period="1y", interval="1d", auto_adjust=True, progress=False)
         if df.empty: return {"error": "Ticker not found"}
         
-        # Extract single values using .iloc[-1]
         last_close = float(df['Close'].iloc[-1])
         ma20 = float(df['Close'].rolling(20, min_periods=1).mean().iloc[-1])
         ma200 = float(df['Close'].rolling(200, min_periods=1).mean().iloc[-1])
         
         recent = df.tail(30)
-        low_val = float(recent['Low'].min())
-        high_val = float(recent['High'].max())
-        
-        psych = round(((last_close - low_val) / (high_val - low_val + 0.01)) * 100, 0)
+        psych = round(((last_close - float(recent['Low'].min())) / (float(recent['High'].max()) - float(recent['Low'].min()) + 0.01)) * 100, 0)
         sharpe = round((df['Close'].pct_change().mean() / df['Close'].pct_change().std()) * np.sqrt(252), 2)
         vol = round(df['Close'].pct_change().std() * np.sqrt(252), 4)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
