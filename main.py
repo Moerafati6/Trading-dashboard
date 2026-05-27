@@ -23,7 +23,6 @@ def get_signals(ticker: str = "AAPL"):
     data["MA50"] = data["Close"].rolling(50).mean()
     data["MA200"] = data["Close"].rolling(200).mean()
     
-    # Quantitative Metrics
     recent = data.tail(30)
     psych = round(((data['Close'].iloc[-1] - recent['Low'].min()) / (recent['High'].max() - recent['Low'].min())) * 100, 0)
     sharpe = round((data['Close'].pct_change().mean() / data['Close'].pct_change().std()) * np.sqrt(252), 2)
