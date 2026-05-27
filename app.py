@@ -6,10 +6,10 @@ import plotly.graph_objects as go
 # 1. SETUP & SECRETS
 st.set_page_config(page_title="Nexus Institutional Terminal", layout="wide")
 
-# Using the keys defined in your Streamlit Secrets settings
-API_BASE_URL = st.secrets["https://trading-dashboard-u7pl.onrender.com"]
-SUPABASE_URL = st.secrets["https://acjjbmtjouundpsbycue.supabase.co"]
-SUPABASE_KEY = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFjampibXRqb3V1bmRwc2J5Y3VlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NTMzNjYsImV4cCI6MjA5NTQyOTM2Nn0.FpkwT9sHXnT-Qj1v7c5ETFj9sKmAOal4oXsnWxfhyCk"]
+# Look up the values by their names from your Streamlit Secrets settings
+API_BASE_URL = st.secrets["API_BASE_URL"]
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 # 2. AUTHENTICATION ENGINE
 def is_authorized(key):
@@ -24,7 +24,7 @@ if "auth" not in st.session_state: st.session_state.auth = False
 
 # 3. SIDEBAR GATEKEEPER
 with st.sidebar:
-    st.header("Nexus Terminal Access")
+    st.header("Nexus Access")
     if not st.session_state.auth:
         key = st.text_input("Enter Premium Key", type="password")
         if st.button("Unlock"):
@@ -32,7 +32,7 @@ with st.sidebar:
             else: st.error("Invalid Key.")
         st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/dRm6oAe2b98GeLWBMdcs800")
     else:
-        st.success("Premium Terminal Active")
+        st.success("Terminal Unlocked")
         if st.button("Logout"): st.session_state.auth = False; st.rerun()
 
 # 4. DASHBOARD ENGINE
@@ -67,4 +67,3 @@ if st.session_state.auth:
         except: st.error("Backend connection error.")
 else:
     st.info("Unlock to access institutional ATR and signal directives.")
-Next Steps:
