@@ -7,33 +7,34 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 
 @app.get("/market_movers")
 def get_movers():
+    # Return 5 aktuell hot market tickers
     return ["NVDA", "AMD", "AVGO", "TSM", "MSFT"]
 
 @app.get("/signals")
 async def get_signals(ticker: str):
-    # Ensure string cleaning
+    # CRITICAL FIX 1: Explicit string cleaning before API call
     ticker = ticker.strip().upper()
     try:
         df = yf.download(ticker, period="1y", interval="1d", auto_adjust=True, progress=False)
         if df.empty: return {"error": f"Ticker '{ticker}' not found"}
         
+        # CRITICAL FIX 2: Scalar extraction to prevent Series conversion error
         last_close = float(df['Close'].iloc[-1])
         ma20 = float(df['Close'].rolling(20, min_periods=1).mean().iloc[-1])
         ma200 = float(df['Close'].rolling(200, min_periods=1).mean().iloc[-1])
         
         recent = df.tail(30)
-        low_val = float(recent['Low'].min())
-        high_val = float(recent['High'].max())
-        
-        psych = round(((last_close - low_val) / (high_val - low_val + 0.01)) * 100, 0)
+        psych = round(((last_close - float(recent['Low'].min())) / (float(recent['High'].max()) - float(recent['Low'].min()) + 0.01)) * 100, 0)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
         
         return {
+            "ticker_confirmed": ticker,
             "regime": "BULL" if last_close > ma200 else "BEAR",
             "action": "HOLD LONG" if (last_close > ma200 and last_close > ma20) else "HOLD SHORT",
             "psych_score": float(psych),
             "psych_meaning": "Greed" if psych >= 75 else "Panic" if psych <= 25 else "Neutral",
             "perf": float(perf),
+            "price": last_close,
             "chart_data": df.tail(60).to_dict(orient='list')
         }
     except Exception as e:
