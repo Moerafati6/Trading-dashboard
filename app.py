@@ -13,6 +13,9 @@ with st.sidebar:
         if st.button("Unlock"):
             if key == st.secrets.get("PASSKEY"): st.session_state.auth = True; st.rerun()
             else: st.error("Invalid Key")
+        # Added missing buttons
+        if st.button("Start 7-Day Free Trial"): st.session_state.auth = True; st.rerun()
+        st.link_button("Subscribe ($29/mo)", "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801")
     else:
         if st.button("Logout"): st.session_state.auth = False; st.rerun()
 
@@ -20,6 +23,8 @@ st.title("Nexus Quantitative Engine")
 if st.session_state.auth:
     movers = requests.get(f"{st.secrets['API_BASE_URL']}/market_movers").json()
     ticker = st.selectbox("Hot Market Movers", movers)
+    search = st.text_input("Or Search Ticker")
+    if search: ticker = search
     
     if st.button("Execute Scan"):
         res = requests.get(f"{st.secrets['API_BASE_URL']}/signals?ticker={ticker}").json()
