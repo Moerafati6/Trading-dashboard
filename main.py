@@ -36,4 +36,4 @@ async def get_signals(ticker: str):
             "chart_data": df.tail(60).to_dict(orient='list')
         }
     except Exception as e:
-        return {"error": str(e)}tr(e)}"}
+        return {"error": str(e)}
