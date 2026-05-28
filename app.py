@@ -8,10 +8,11 @@ st.set_page_config(
 )
 
 # -----------------------------
-# CUSTOM DARK STYLING
+# CUSTOM STYLING
 # -----------------------------
 
 st.markdown("""
+
 <style>
 
 .stApp {
@@ -59,6 +60,7 @@ div[data-baseweb="select"] > div {
 }
 
 </style>
+
 """, unsafe_allow_html=True)
 
 # -----------------------------
@@ -157,7 +159,7 @@ except Exception as e:
     st.stop()
 
 # -----------------------------
-# TICKER SELECT
+# TICKER SELECTION
 # -----------------------------
 
 c1, c2 = st.columns(2)
@@ -206,10 +208,6 @@ if st.button("Execute Scan"):
 
         st.stop()
 
-    # -----------------------------
-    # METRICS
-    # -----------------------------
-
     st.subheader(
         f"Quantitative Analysis for {res['ticker']}"
     )
@@ -222,7 +220,7 @@ if st.button("Execute Scan"):
     )
 
     m2.metric(
-        "Psych Score",
+        "Psychology",
         f"{res['psych_meaning']} ({res['psych_score']})"
     )
 
@@ -230,10 +228,6 @@ if st.button("Execute Scan"):
         "Annual Return",
         f"{res['annual_return']}%"
     )
-
-    # -----------------------------
-    # CHART
-    # -----------------------------
 
     fig = go.Figure(data=[
 
@@ -265,4 +259,3 @@ if st.button("Execute Scan"):
         fig,
         use_container_width=True
     )
-```
