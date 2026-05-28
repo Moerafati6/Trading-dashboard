@@ -23,10 +23,14 @@ async def get_signals(ticker: str):
         ma20 = float(df['Close'].rolling(20, min_periods=1).mean().iloc[-1])
         
         recent = df.tail(30)
-        psych = round(((last_close - float(recent['Low'].min())) / (float(recent['High'].max()) - float(recent['Low'].min()) + 0.01)) * 100, 0)
+        low_val = float(recent['Low'].min())
+        high_val = float(recent['High'].max())
+        
+        psych = round(((last_close - low_val) / (high_val - low_val + 0.01)) * 100, 0)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
         
         return {
+            "ticker": ticker,
             "regime": "BULLISH" if last_close > ma200 else "BEARISH",
             "action": "HOLD LONG" if (last_close > ma200 and last_close > ma20) else "HOLD SHORT",
             "psych_score": float(psych),
