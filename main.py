@@ -6,17 +6,13 @@ import numpy as np
 app = FastAPI()
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-@app.get("/market_movers")
-def get_movers():
-    return ["NVDA", "AMD", "AVGO", "TSM", "MSFT"]
-
 @app.get("/signals")
 async def get_signals(ticker: str):
     try:
         df = yf.download(ticker.upper(), period="1y", interval="1d", auto_adjust=True, progress=False)
         if df.empty: return {"error": "Ticker not found"}
         
-        # Force single values (scalars) to prevent 'Series' errors
+        # KEY FIX: Force extraction of single values (scalars) using .iloc[-1]
         last_close = float(df['Close'].iloc[-1])
         ma20 = float(df['Close'].rolling(20, min_periods=1).mean().iloc[-1])
         ma200 = float(df['Close'].rolling(200, min_periods=1).mean().iloc[-1])
@@ -25,6 +21,7 @@ async def get_signals(ticker: str):
         low_val = float(recent['Low'].min())
         high_val = float(recent['High'].max())
         
+        # Calculate scalars
         psych = round(((last_close - low_val) / (high_val - low_val + 0.01)) * 100, 0)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
         
