@@ -16,7 +16,7 @@ async def get_signals(ticker: str):
         df = yf.download(ticker, period="1y", interval="1d", auto_adjust=True, progress=False)
         if df.empty: return {"error": f"Ticker '{ticker}' not found"}
         
-        # Explicit scalar conversion
+        # FIX: Force extraction to single float (scalar) to avoid 'Series' error
         last_close = float(df['Close'].iloc[-1])
         ma200 = float(df['Close'].rolling(200, min_periods=1).mean().iloc[-1])
         ma20 = float(df['Close'].rolling(20, min_periods=1).mean().iloc[-1])
@@ -24,7 +24,6 @@ async def get_signals(ticker: str):
         recent = df.tail(30)
         low_val = float(recent['Low'].min())
         high_val = float(recent['High'].max())
-        
         psych = round(((last_close - low_val) / (high_val - low_val + 0.01)) * 100, 0)
         perf = round(((last_close / float(df['Close'].iloc[0])) - 1) * 100, 2)
         
