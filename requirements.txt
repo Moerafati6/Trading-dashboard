@@ -1,7 +1,5 @@
-fastapi
-uvicorn
+streamlit
+request
+plotly
 yfinance
 pandas
-numpy
-requests
-plotly
