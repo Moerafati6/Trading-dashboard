@@ -3,3 +3,6 @@ requests
 plotly
 yfinance
 pandas
+supabase
+stripe
+numpy
