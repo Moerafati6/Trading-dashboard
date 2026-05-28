@@ -1,3 +1,4 @@
+```python
 import streamlit as st
 import requests
 import plotly.graph_objects as go
@@ -7,12 +8,13 @@ st.set_page_config(
     layout="wide"
 )
 
-# ---------------------------
-# DARK UI STYLING
-# ---------------------------
+# -----------------------------
+# CUSTOM DARK STYLING
+# -----------------------------
 
 st.markdown("""
 <style>
+
 .stApp {
     background-color: #070b12;
     color: white;
@@ -23,7 +25,7 @@ section[data-testid="stSidebar"] {
 }
 
 h1, h2, h3 {
-    color: #f9fafb;
+    color: white;
 }
 
 div[data-testid="stMetric"] {
@@ -42,23 +44,34 @@ div[data-testid="stMetric"] {
     font-weight: 700;
 }
 
-.stTextInput input {
-    background: #0f172a;
-    color: white;
+.stSelectbox label,
+.stTextInput label {
+    color: white !important;
 }
+
+div[data-baseweb="select"] > div {
+    background-color: white !important;
+    color: black !important;
+}
+
+.stTextInput input {
+    background-color: white !important;
+    color: black !important;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------
+# -----------------------------
 # SESSION STATE
-# ---------------------------
+# -----------------------------
 
 if "auth" not in st.session_state:
     st.session_state.auth = False
 
-# ---------------------------
+# -----------------------------
 # SIDEBAR
-# ---------------------------
+# -----------------------------
 
 with st.sidebar:
 
@@ -74,13 +87,16 @@ with st.sidebar:
         if st.button("Unlock"):
 
             if key == st.secrets.get("PASSKEY"):
+
                 st.session_state.auth = True
                 st.rerun()
 
             else:
+
                 st.error("Wrong passkey")
 
         if st.button("Start 7-Day Free Trial"):
+
             st.session_state.auth = True
             st.rerun()
 
@@ -94,12 +110,13 @@ with st.sidebar:
         st.success("Access granted")
 
         if st.button("Logout"):
+
             st.session_state.auth = False
             st.rerun()
 
-# ---------------------------
+# -----------------------------
 # MAIN PAGE
-# ---------------------------
+# -----------------------------
 
 st.title("Nexus Quantitative Engine")
 
@@ -111,21 +128,21 @@ if not st.session_state.auth:
 
     st.stop()
 
-# ---------------------------
+# -----------------------------
 # API CONNECTION
-# ---------------------------
+# -----------------------------
 
 base_url = st.secrets.get("API_BASE_URL")
 
 if not base_url:
 
-    st.error("Missing API_BASE_URL in Streamlit secrets.")
+    st.error("Missing API_BASE_URL")
 
     st.stop()
 
-# ---------------------------
+# -----------------------------
 # LOAD TICKERS
-# ---------------------------
+# -----------------------------
 
 try:
 
@@ -140,9 +157,9 @@ except Exception as e:
 
     st.stop()
 
-# ---------------------------
-# TICKER SELECTION
-# ---------------------------
+# -----------------------------
+# TICKER SELECT
+# -----------------------------
 
 c1, c2 = st.columns(2)
 
@@ -158,9 +175,9 @@ search = c2.text_input(
 
 ticker = search.upper().strip() if search else choice
 
-# ---------------------------
+# -----------------------------
 # EXECUTE SCAN
-# ---------------------------
+# -----------------------------
 
 if st.button("Execute Scan"):
 
@@ -184,19 +201,15 @@ if st.button("Execute Scan"):
 
         st.stop()
 
-    # ---------------------------
-    # HANDLE ERRORS
-    # ---------------------------
-
     if "error" in res:
 
         st.error(res["error"])
 
         st.stop()
 
-    # ---------------------------
+    # -----------------------------
     # METRICS
-    # ---------------------------
+    # -----------------------------
 
     st.subheader(
         f"Quantitative Analysis for {res['ticker']}"
@@ -219,9 +232,9 @@ if st.button("Execute Scan"):
         f"{res['annual_return']}%"
     )
 
-    # ---------------------------
-    # CANDLESTICK CHART
-    # ---------------------------
+    # -----------------------------
+    # CHART
+    # -----------------------------
 
     fig = go.Figure(data=[
 
@@ -253,3 +266,4 @@ if st.button("Execute Scan"):
         fig,
         use_container_width=True
     )
+```
