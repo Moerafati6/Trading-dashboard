@@ -44,4 +44,4 @@ if st.session_state.auth:
                 low=res['chart_data']['Low'], close=res['chart_data']['Close']
             )])
             fig.update_layout(template="plotly_dark", height=500)
-            st.plotly_chart(fig, use_container_width=True)rt(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
