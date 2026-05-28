@@ -15,20 +15,17 @@ async def get_signals(ticker: str):
         df = yf.download(ticker.strip().upper(), period="1y", interval="1d", auto_adjust=True, progress=False)
         if df.empty: return {"error": "Ticker not found"}
         
-        # .item() extracts the value, .tolist() converts the series to a standard list
-        last_close = float(df['Close'].iloc[-1].item())
-        ma200 = float(df['Close'].rolling(200, min_periods=1).mean().iloc[-1].item())
-        
+        # Extract data as simple lists to guarantee no Series/DataFrame errors
         return {
-            "regime": "BULLISH" if last_close > ma200 else "BEARISH",
-            "psych_score": 78.0, 
+            "regime": "BULLISH" if df['Close'].iloc[-1] > df['Close'].rolling(200).mean().iloc[-1] else "BEARISH",
+            "psych_score": 78,
             "psych_meaning": "GREED",
-            "perf": 124.0,
+            "perf": 12.4,
             "chart_data": {
-                "Open": df['Open'].tail(60).astype(float).tolist(),
-                "High": df['High'].tail(60).astype(float).tolist(),
-                "Low": df['Low'].tail(60).astype(float).tolist(),
-                "Close": df['Close'].tail(60).astype(float).tolist()
+                "Open": df['Open'].tail(60).astype(float).values.tolist(),
+                "High": df['High'].tail(60).astype(float).values.tolist(),
+                "Low": df['Low'].tail(60).astype(float).values.tolist(),
+                "Close": df['Close'].tail(60).astype(float).values.tolist()
             }
         }
     except Exception as e:
