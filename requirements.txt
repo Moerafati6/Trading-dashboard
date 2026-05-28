@@ -5,4 +5,5 @@ yfinance
 pandas
 supabase
 stripe
-numpy
+fastapi
+uvicorn
