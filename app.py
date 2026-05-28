@@ -20,17 +20,27 @@ with st.sidebar:
 
 st.title("Nexus Quantitative Engine")
 if st.session_state.auth:
-    ticker = st.text_input("Search Ticker", value="NVDA").upper()
-    if st.button("Execute Scan"):
-        res = requests.get(f"{st.secrets['API_BASE_URL']}/signals?ticker={ticker}").json()
-        if "error" in res: st.error(res['error'])
-        else:
-            st.metric("Regime", res['regime'])
-            st.info(f"Psych: {res['psych_meaning']} ({res['psych_score']}) | Return: {res['perf']}%")
-            
-            fig = go.Figure(data=[go.Candlestick(
-                open=res['chart_data']['Open'], high=res['chart_data']['High'],
-                low=res['chart_data']['Low'], close=res['chart_data']['Close']
-            )])
-            fig.update_layout(template="plotly_dark", height=500)
-            st.plotly_chart(fig, use_container_width=True)
+    try:
+        movers = requests.get(f"{st.secrets['API_BASE_URL']}/market_movers").json()
+        choice = st.selectbox("Hot Market Movers", movers)
+        search = st.text_input("Or Search Ticker")
+        ticker = search if search else choice
+        
+        if st.button("Execute Scan"):
+            res = requests.get(f"{st.secrets['API_BASE_URL']}/signals?ticker={ticker}").json()
+            if "error" in res: st.error(res['error'])
+            else:
+                st.subheader(f"Quantitative Analysis for {res['ticker']} (1 Year)")
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Regime", res['regime'])
+                c2.metric("Psych Score", f"{res['psych_meaning']} ({res['psych_score']})")
+                c3.metric("Annual Return", f"{res['perf']}%")
+                
+                fig = go.Figure(data=[go.Candlestick(
+                    open=res['chart_data']['Open'], high=res['chart_data']['High'],
+                    low=res['chart_data']['Low'], close=res['chart_data']['Close']
+                )])
+                fig.update_layout(template="plotly_dark", height=500)
+                st.plotly_chart(fig, use_container_width=True)
+    except Exception as e:
+        st.error(f"Connection Error: {e}")
