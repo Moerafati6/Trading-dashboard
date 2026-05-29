@@ -276,7 +276,49 @@ psychology mapping, Sharpe ratio, and portfolio scanner.
 """, unsafe_allow_html=True)
 
 if not st.session_state.auth:
-    st.info("Enter passkey, start trial, or subscribe to access the terminal.")
+    st.info("Start a free trial or subscribe to access the Nexus Terminal.")
+
+    email_main = st.text_input("Email for 7-Day Free Trial", key="main_trial_email")
+
+    cta1, cta2 = st.columns(2)
+
+    with cta1:
+        if st.button("Start 7-Day Free Trial", key="main_trial_button"):
+            if not supabase:
+                st.error("Trial system is not connected yet.")
+            elif not email_main:
+                st.error("Enter your email first.")
+            else:
+                active, expires_at = start_trial(email_main.strip().lower())
+
+                if active:
+                    st.session_state.auth = True
+                    st.session_state.user_email = email_main.strip().lower()
+                    st.success(f"Trial active until {expires_at.strftime('%b %d, %Y')}")
+                    st.rerun()
+                else:
+                    st.error("Your free trial has expired. Subscribe to continue.")
+
+    with cta2:
+        st.markdown("""
+        <a href="https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801" target="_blank">
+            <button style="
+                background:#ef4444;
+                color:white;
+                border:none;
+                border-radius:12px;
+                padding:12px 18px;
+                font-weight:900;
+                width:100%;
+                cursor:pointer;
+                font-size:16px;
+                margin-top:28px;
+            ">
+                Subscribe ($29/mo)
+            </button>
+        </a>
+        """, unsafe_allow_html=True)
+
     st.stop()
 
 base_url = st.secrets.get("API_BASE_URL")
