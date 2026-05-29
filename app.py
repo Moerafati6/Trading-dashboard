@@ -381,6 +381,10 @@ top1, top2, top3 = st.columns([1.25, 1.25, 0.7])
 choice = top1.selectbox("Popular Assets", movers)
 search = top2.text_input("Or Search Ticker", placeholder="Examples: NVDA, BTC-USD, CL=F")
 mode = top3.radio("Mode", ["consistent", "aggressive"], horizontal=False)
+st.info(
+    "Consistent = higher-confidence trend signals. "
+    "Aggressive = earlier entries with more risk and more opportunities."
+)
 
 ticker = search.upper().strip() if search else choice
 
