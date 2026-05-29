@@ -341,41 +341,92 @@ mode = top3.radio("Mode", ["consistent", "aggressive"], horizontal=False)
 
 ticker = search.upper().strip() if search else choice
 
+if "portfolio_assets" not in st.session_state:
+    st.session_state.portfolio_assets = ["AAPL", "NVDA", "MSFT", "BTC-USD", "ETH-USD"]
+
 scan_col, portfolio_col = st.columns([1, 1])
 
 run_single = scan_col.button("Execute Nexus Scan")
-run_portfolio = portfolio_col.button("Run Portfolio Scanner")
+
+st.markdown("""
+<div class="nexus-card">
+<b>Portfolio Scanner</b><br>
+Build your own watchlist, then scan multiple assets at once using the Nexus signal engine.
+</div>
+""", unsafe_allow_html=True)
+
+portfolio_input = st.text_input(
+    "Add assets to portfolio scanner",
+    placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
+)
+
+add_col, clear_col, run_col = st.columns([1, 1, 1])
+
+with add_col:
+    if st.button("Add Assets"):
+        new_assets = [
+            t.strip().upper()
+            for t in portfolio_input.split(",")
+            if t.strip()
+        ]
+
+        for asset in new_assets:
+            if asset not in st.session_state.portfolio_assets:
+                st.session_state.portfolio_assets.append(asset)
+
+        st.success("Assets added.")
+
+with clear_col:
+    if st.button("Clear Portfolio"):
+        st.session_state.portfolio_assets = []
+        st.warning("Portfolio cleared.")
+
+with run_col:
+    run_portfolio = st.button("Run Portfolio Scanner")
+
+if st.session_state.portfolio_assets:
+    st.write("Current Portfolio Scanner List:")
+    st.code(", ".join(st.session_state.portfolio_assets))
+else:
+    st.info("No assets added yet.")
 
 if run_portfolio:
-    try:
-        scanner = requests.get(
-            f"{base_url}/scanner",
-            params={"mode": mode},
-            timeout=60
-        ).json()
+    if not st.session_state.portfolio_assets:
+        st.warning("Add at least one asset first.")
+    else:
+        try:
+            scanner = requests.get(
+                f"{base_url}/scanner",
+                params={
+                    "mode": mode,
+                    "tickers": ",".join(st.session_state.portfolio_assets)
+                },
+                timeout=90
+            ).json()
 
-        if not scanner:
-            st.warning("No scanner results returned.")
-        else:
-            st.subheader("Portfolio Scanner")
+            if not scanner:
+                st.warning("No scanner results returned.")
+            else:
+                st.subheader("Portfolio Scanner Results")
 
-            df = pd.DataFrame(scanner)
+                df = pd.DataFrame(scanner)
 
-            st.dataframe(
-                df,
-                use_container_width=True,
-                hide_index=True
-            )
+                st.dataframe(
+                    df,
+                    use_container_width=True,
+                    hide_index=True
+                )
 
-            st.markdown("""
-            <div class="nexus-card">
-            <b>Scanner logic:</b> Assets are ranked by signal confidence. 
-            Higher confidence means stronger alignment between regime, slow trend, fast timing, and risk-adjusted performance.
-            </div>
-            """, unsafe_allow_html=True)
+                st.markdown("""
+                <div class="nexus-card">
+                <b>Scanner logic:</b> Your portfolio is ranked by signal confidence.
+                Higher confidence means stronger alignment between regime, slow trend,
+                fast timing, ATR risk structure, and risk-adjusted performance.
+                </div>
+                """, unsafe_allow_html=True)
 
-    except Exception as e:
-        st.error(f"Scanner failed: {e}")
+        except Exception as e:
+            st.error(f"Scanner failed: {e}")
 
 if run_single:
     if ticker == "SELECT ASSET":
