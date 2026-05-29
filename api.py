@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from datetime import datetime, timezone
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -254,6 +255,7 @@ def run_engine(ticker: str, mode: str = "consistent"):
     return {
         "ticker": yf_ticker,
         "mode": mode.upper(),
+        "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "price": round(price, 2),
         "regime": regime_name,
         "action": action,
