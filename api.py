@@ -293,8 +293,46 @@ def get_signals(ticker: str, mode: str = "consistent"):
 
 
 @app.get("/scanner")
-def scanner(mode: str = "consistent"):
+def scanner(mode: str = "consistent", tickers: str = ""):
     results = []
+
+    if tickers:
+        scan_list = [
+            t.strip().upper()
+            for t in tickers.split(",")
+            if t.strip()
+        ]
+    else:
+        scan_list = WATCHLIST
+
+    for ticker in scan_list:
+        try:
+            res = run_engine(ticker, mode)
+            if "error" not in res:
+                results.append({
+                    "ticker": res["ticker"],
+                    "action": res["action"],
+                    "confidence": res["confidence"],
+                    "regime": res["regime"],
+                    "psychology": f'{res["psych_meaning"]} ({res["psych_score"]})',
+                    "price": res["price"],
+                    "atr": res["atr"],
+                    "stop_level": res["stop_level"],
+                    "take_profit": res["take_profit"],
+                    "sharpe": res["sharpe"],
+                    "backtest_return": res["backtest_return"],
+                    "asset_return": res["asset_return"],
+                })
+        except Exception:
+            pass
+
+    results = sorted(
+        results,
+        key=lambda x: x["confidence"],
+        reverse=True
+    )
+
+    return results
 
     for ticker in WATCHLIST:
         try:
