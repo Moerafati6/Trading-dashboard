@@ -140,6 +140,17 @@ div[data-baseweb="select"] > div {
     margin-bottom: 22px;
     box-shadow: 0 0 30px rgba(239, 68, 68, 0.25);
 }
+a[data-testid="stLinkButton"] {
+    background: #2563eb !important;
+    color: white !important;
+    border-radius: 12px !important;
+    font-weight: 900 !important;
+    border: 1px solid #60a5fa !important;
+}
+
+a[data-testid="stLinkButton"] p {
+    color: white !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
