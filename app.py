@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import plotly.graph_objects as go
 import pandas as pd
+from datetime import datetime, timedelta, timezone
+from supabase import create_client
 
 st.set_page_config(
     page_title="Nexus Quantitative Engine",
@@ -156,6 +158,56 @@ a[data-testid="stLinkButton"] p {
 
 if "auth" not in st.session_state:
     st.session_state.auth = False
+if "user_email" not in st.session_state:
+    st.session_state.user_email = ""
+
+supabase_url = st.secrets.get("SUPABASE_URL")
+supabase_key = st.secrets.get("SUPABASE_KEY")
+
+supabase = None
+
+if supabase_url and supabase_key:
+    supabase = create_client(supabase_url, supabase_key)
+
+
+def utc_now():
+    return datetime.now(timezone.utc)
+
+
+def start_trial(email):
+    now = utc_now()
+    expires = now + timedelta(days=7)
+
+    existing = supabase.table("trials").select("*").eq("email", email).execute()
+
+    if existing.data:
+        trial = existing.data[0]
+        expires_at = datetime.fromisoformat(trial["expires_at"].replace("Z", "+00:00"))
+
+        if expires_at > now:
+            return True, expires_at
+
+        return False, expires_at
+
+    supabase.table("trials").insert({
+        "email": email,
+        "started_at": now.isoformat(),
+        "expires_at": expires.isoformat()
+    }).execute()
+
+    return True, expires
+
+
+def check_trial(email):
+    existing = supabase.table("trials").select("*").eq("email", email).execute()
+
+    if not existing.data:
+        return False, None
+
+    trial = existing.data[0]
+    expires_at = datetime.fromisoformat(trial["expires_at"].replace("Z", "+00:00"))
+
+    return expires_at > utc_now(), expires_at
 
 with st.sidebar:
     st.title("Nexus Terminal")
@@ -171,24 +223,39 @@ with st.sidebar:
             else:
                 st.error("Wrong passkey")
 
+        email = st.text_input("Email for 7-Day Trial")
+
         if st.button("Start 7-Day Free Trial"):
-            st.session_state.auth = True
-            st.rerun()
+           if not supabase:
+                st.error("Trial system is not connected yet.")
+           elif not email:
+                st.error("Enter your email first.")
+           else:
+                active, expires_at = start_trial(email.strip().lower())
+
+                if active:
+                   st.session_state.auth = True
+                   st.session_state.user_email = email.strip().lower()
+                   st.success(f"Trial active until {expires_at.strftime('%b %d, %Y')}")
+                   st.rerun()
+                else:
+                   st.error("Your free trial has expired. Subscribe to continue.")
         st.markdown("""
         <a href="https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801" target="_blank">
-            <button style="
-                background:#ef4444;
-                color:white;
-                border:none;
-                border-radius:12px;
-                padding:12px 18px;
-                font-weight:900;
-                width:100%;
-                cursor:pointer;
-                font-size:16px;
-            ">
-                Subscribe ($29/mo)
-             </button>
+           <button style="
+                   background:#ef4444;
+                   color:white;
+                   border:none;
+                   border-radius:12px;
+                   padding:12px 18px;
+                   font-weight:900;
+                   width:100%;
+                   cursor:pointer;
+                   font-size:16px;
+                   margin-top:10px;
+           ">
+                   Subscribe ($29/mo)
+            </button>
          </a>
          """, unsafe_allow_html=True)
     else:
@@ -288,6 +355,7 @@ if run_single:
         st.stop()
 
     st.subheader(f"Quantitative Analysis for {res['ticker']}")
+    st.caption(f"Last Updated: {res.get('last_updated', 'N/A')}")
 
     if res["action"] == "ENTER LONG":
         st.markdown(f'<div class="signal-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
