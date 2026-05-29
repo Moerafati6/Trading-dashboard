@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import plotly.graph_objects as go
+import pandas as pd
 
 st.set_page_config(
     page_title="Nexus Quantitative Engine",
@@ -11,51 +12,55 @@ st.markdown("""
 <style>
 .stApp {
     background-color: #060a12;
-    color: white;
+    color: #f8fafc;
 }
 
 section[data-testid="stSidebar"] {
-    background-color: #0f172a;
+    background: linear-gradient(180deg, #111827, #020617);
+}
+
+section[data-testid="stSidebar"] * {
+    color: #f8fafc !important;
 }
 
 h1 {
-    color: white;
+    color: #f8fafc !important;
     font-size: 46px !important;
     font-weight: 900 !important;
 }
 
 h2, h3 {
-    color: white;
-    font-weight: 800 !important;
+    color: #f8fafc !important;
+    font-weight: 900 !important;
 }
 
 label, p, span {
-    color: white !important;
+    color: #f8fafc !important;
 }
 
 div[data-testid="stMetric"] {
     background: linear-gradient(135deg, #10203f, #172554);
     padding: 22px;
     border-radius: 18px;
-    border: 1px solid #3b82f6;
-    box-shadow: 0 0 18px rgba(59, 130, 246, 0.18);
+    border: 1px solid #38bdf8;
+    box-shadow: 0 0 22px rgba(56, 189, 248, 0.20);
 }
 
 div[data-testid="stMetricLabel"] {
     font-size: 15px !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
     color: #dbeafe !important;
 }
 
 div[data-testid="stMetricValue"] {
-    font-size: 30px !important;
-    font-weight: 900 !important;
+    font-size: 31px !important;
+    font-weight: 950 !important;
     color: #ffffff !important;
 }
 
 .stButton > button {
     background: #22c55e;
-    color: white;
+    color: white !important;
     border-radius: 12px;
     border: none;
     padding: 0.75rem 1.2rem;
@@ -65,7 +70,7 @@ div[data-testid="stMetricValue"] {
 
 .stButton > button:hover {
     background: #16a34a;
-    color: white;
+    color: white !important;
 }
 
 div[data-baseweb="select"] > div {
@@ -83,52 +88,57 @@ div[data-baseweb="select"] > div {
 .stSelectbox label,
 .stTextInput label,
 .stRadio label {
-    color: white !important;
-    font-weight: 800 !important;
+    color: #f8fafc !important;
+    font-weight: 900 !important;
 }
 
 .nexus-card {
     background: linear-gradient(135deg, #0f172a, #111827);
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
     border: 1px solid #334155;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    color: #f8fafc;
+    font-size: 17px;
 }
 
 .signal-box {
     background: linear-gradient(135deg, #052e16, #14532d);
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
     border: 1px solid #22c55e;
-    font-size: 26px;
-    font-weight: 900;
+    font-size: 30px;
+    font-weight: 950;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 30px rgba(34, 197, 94, 0.25);
 }
 
 .wait-box {
     background: linear-gradient(135deg, #422006, #713f12);
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
     border: 1px solid #f59e0b;
-    font-size: 26px;
-    font-weight: 900;
+    font-size: 30px;
+    font-weight: 950;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.25);
 }
 
 .short-box {
     background: linear-gradient(135deg, #450a0a, #7f1d1d);
     color: white;
-    padding: 20px;
+    padding: 22px;
     border-radius: 18px;
     border: 1px solid #ef4444;
-    font-size: 26px;
-    font-weight: 900;
+    font-size: 30px;
+    font-weight: 950;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 22px;
+    box-shadow: 0 0 30px rgba(239, 68, 68, 0.25);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -138,6 +148,7 @@ if "auth" not in st.session_state:
 
 with st.sidebar:
     st.title("Nexus Terminal")
+    st.caption("Quant.Rafati Signal Engine")
 
     if not st.session_state.auth:
         key = st.text_input("Enter Passkey", type="password")
@@ -157,7 +168,6 @@ with st.sidebar:
             "Subscribe ($29/mo)",
             "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801"
         )
-
     else:
         st.success("Access granted")
         if st.button("Logout"):
@@ -168,8 +178,10 @@ st.title("Nexus Quantitative Engine")
 
 st.markdown("""
 <div class="nexus-card">
-<b>Quant.Rafati Signal Engine</b><br>
-Regime classification, moving-average confirmation, ATR volatility stops, psychology mapping, backtest return, and Sharpe ratio.
+<b>Premium systematic market scanner:</b><br>
+Regime classification, MA5/MA20 fast confirmation, MA10/MA50 slow confirmation,
+MA200 trend filter, ATR volatility stops, take-profit zones, confidence scoring,
+psychology mapping, Sharpe ratio, and portfolio scanner.
 </div>
 """, unsafe_allow_html=True)
 
@@ -184,36 +196,56 @@ if not base_url:
     st.stop()
 
 try:
-    movers = requests.get(
-        f"{base_url}/market_movers",
-        timeout=10
-    ).json()
+    movers = requests.get(f"{base_url}/market_movers", timeout=10).json()
 except Exception as e:
     st.error(f"Backend connection failed: {e}")
     st.stop()
 
-top1, top2, top3 = st.columns([1.3, 1.3, 0.8])
+top1, top2, top3 = st.columns([1.25, 1.25, 0.7])
 
-choice = top1.selectbox(
-    "Popular Assets",
-    movers
-)
-
-search = top2.text_input(
-    "Or Search Ticker",
-    placeholder="Examples: NVDA, BTC-USD, CL=F"
-)
-
-mode = top3.radio(
-    "Mode",
-    ["consistent", "aggressive"],
-    horizontal=False
-)
+choice = top1.selectbox("Popular Assets", movers)
+search = top2.text_input("Or Search Ticker", placeholder="Examples: NVDA, BTC-USD, CL=F")
+mode = top3.radio("Mode", ["consistent", "aggressive"], horizontal=False)
 
 ticker = search.upper().strip() if search else choice
 
-if st.button("Execute Nexus Scan"):
+scan_col, portfolio_col = st.columns([1, 1])
 
+run_single = scan_col.button("Execute Nexus Scan")
+run_portfolio = portfolio_col.button("Run Portfolio Scanner")
+
+if run_portfolio:
+    try:
+        scanner = requests.get(
+            f"{base_url}/scanner",
+            params={"mode": mode},
+            timeout=60
+        ).json()
+
+        if not scanner:
+            st.warning("No scanner results returned.")
+        else:
+            st.subheader("Portfolio Scanner")
+
+            df = pd.DataFrame(scanner)
+
+            st.dataframe(
+                df,
+                use_container_width=True,
+                hide_index=True
+            )
+
+            st.markdown("""
+            <div class="nexus-card">
+            <b>Scanner logic:</b> Assets are ranked by signal confidence. 
+            Higher confidence means stronger alignment between regime, slow trend, fast timing, and risk-adjusted performance.
+            </div>
+            """, unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"Scanner failed: {e}")
+
+if run_single:
     if ticker == "SELECT ASSET":
         st.warning("Choose or search an asset first.")
         st.stop()
@@ -235,108 +267,76 @@ if st.button("Execute Nexus Scan"):
     st.subheader(f"Quantitative Analysis for {res['ticker']}")
 
     if res["action"] == "ENTER LONG":
-        st.markdown(f'<div class="signal-box">ACTION: {res["action"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     elif res["action"] == "ENTER SHORT":
-        st.markdown(f'<div class="short-box">ACTION: {res["action"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="short-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="wait-box">ACTION: {res["action"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="wait-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
 
     m1, m2, m3, m4 = st.columns(4)
-
     m1.metric("Regime", res["regime"])
     m2.metric("Psychology", f'{res["psych_meaning"]} ({res["psych_score"]})')
     m3.metric("Current Price", f'${res["price"]}')
     m4.metric("Mode", res["mode"])
 
     m5, m6, m7, m8 = st.columns(4)
-
     m5.metric("ATR", res["atr"])
     m6.metric("Stop Level", res["stop_level"])
     m7.metric("Take Profit", res["take_profit"])
     m8.metric("Sharpe", res["sharpe"])
 
     m9, m10 = st.columns(2)
-
     m9.metric("Strategy Backtest Return", f'{res["backtest_return"]}%')
-    m10.metric("Asset Return", f'{res["annual_return"]}%')
+    m10.metric("Asset Return", f'{res["asset_return"]}%')
 
     dates = res["chart_data"]["Date"]
 
     fig = go.Figure()
 
-    fig.add_trace(
-        go.Candlestick(
-            x=dates,
-            open=res["chart_data"]["Open"],
-            high=res["chart_data"]["High"],
-            low=res["chart_data"]["Low"],
-            close=res["chart_data"]["Close"],
-            name="Price"
-        )
-    )
+    fig.add_trace(go.Candlestick(
+        x=dates,
+        open=res["chart_data"]["Open"],
+        high=res["chart_data"]["High"],
+        low=res["chart_data"]["Low"],
+        close=res["chart_data"]["Close"],
+        name="Price"
+    ))
 
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=res["chart_data"]["MA5"],
-            mode="lines",
-            name="MA5"
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=res["chart_data"]["MA20"],
-            mode="lines",
-            name="MA20"
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=res["chart_data"]["MA10"],
-            mode="lines",
-            name="MA10"
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=res["chart_data"]["MA50"],
-            mode="lines",
-            name="MA50"
-        )
-    )
-
-    fig.add_trace(
-        go.Scatter(
-            x=dates,
-            y=res["chart_data"]["MA200"],
-            mode="lines",
-            name="MA200"
-        )
-    )
+    fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA5"], mode="lines", name="MA5"))
+    fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA20"], mode="lines", name="MA20"))
+    fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA10"], mode="lines", name="MA10"))
+    fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA50"], mode="lines", name="MA50"))
+    fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA200"], mode="lines", name="MA200"))
 
     fig.update_layout(
         template="plotly_dark",
-        height=650,
+        height=680,
         paper_bgcolor="#060a12",
         plot_bgcolor="#0f172a",
         title=f'{res["ticker"]} Price Action + Nexus Moving Average System',
         xaxis_title="Date",
         yaxis_title="Price",
-        font=dict(size=15),
+        font=dict(color="#f8fafc", size=15),
+        title_font=dict(color="#f8fafc", size=22),
         legend=dict(
             orientation="h",
             yanchor="bottom",
-            y=1.02,
+            y=1.04,
             xanchor="right",
-            x=1
+            x=1,
+            font=dict(color="#f8fafc", size=13)
         ),
-        margin=dict(l=40, r=40, t=80, b=40),
+        margin=dict(l=50, r=50, t=90, b=50),
+        xaxis=dict(
+            title_font=dict(color="#f8fafc", size=18),
+            tickfont=dict(color="#f8fafc", size=14),
+            gridcolor="rgba(248,250,252,0.20)"
+        ),
+        yaxis=dict(
+            title_font=dict(color="#f8fafc", size=18),
+            tickfont=dict(color="#f8fafc", size=14),
+            gridcolor="rgba(248,250,252,0.20)"
+        ),
         xaxis_rangeslider_visible=False
     )
 
@@ -345,8 +345,8 @@ if st.button("Execute Nexus Scan"):
     st.markdown("""
     <div class="nexus-card">
     <b>How to read this:</b><br>
-    The engine uses MA200 for market regime, MA10/MA50 for slower confirmation,
-    MA5/MA20 for faster signal timing, and ATR for volatility-based risk levels.
-    This is not financial advice. It is a systematic market-analysis tool.
+    The engine uses MA200 for regime, MA10/MA50 for trend confirmation,
+    MA5/MA20 for timing, ATR for volatility-based stop and take-profit zones,
+    and confidence scoring to rank signal quality. This is not financial advice.
     </div>
     """, unsafe_allow_html=True)
