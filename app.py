@@ -199,6 +199,29 @@ def start_trial(email):
 
 
 def check_trial(email):
+def save_portfolio(email, assets):
+    if not supabase or not email:
+        return False
+
+    supabase.table("portfolios").upsert({
+        "email": email,
+        "assets": assets,
+        "updated_at": utc_now().isoformat()
+    }).execute()
+
+    return True
+
+
+def load_portfolio(email):
+    if not supabase or not email:
+        return []
+
+    result = supabase.table("portfolios").select("*").eq("email", email).execute()
+
+    if result.data:
+        return result.data[0].get("assets", [])
+
+    return []   
     existing = supabase.table("trials").select("*").eq("email", email).execute()
 
     if not existing.data:
@@ -539,7 +562,7 @@ portfolio_input = st.text_input(
     placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
 )
 
-add_col, clear_col, run_col = st.columns([1, 1, 1])
+add_col, clear_col, run_col = st.columns([1, 1, 1, 1])
 
 with add_col:
     if st.button("Add Assets"):
@@ -559,6 +582,16 @@ with clear_col:
     if st.button("Clear Portfolio"):
         st.session_state.portfolio_assets = []
         st.warning("Portfolio cleared.")
+with save_col:
+    if st.button("Save Portfolio"):
+        if not st.session_state.user_email:
+            st.error("Start a trial with email first to save your portfolio.")
+        else:
+            save_portfolio(
+                st.session_state.user_email,
+                st.session_state.portfolio_assets
+            )
+            st.success("Portfolio saved.")
 
 with run_col:
     run_portfolio = st.button("Run Portfolio Scanner")
