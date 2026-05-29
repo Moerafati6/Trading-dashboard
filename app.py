@@ -214,7 +214,8 @@ with st.sidebar:
     st.caption("Quant.Rafati Signal Engine")
 
     if not st.session_state.auth:
-        key = st.text_input("Enter Passkey", type="password")
+        st.caption("Already subscribed? Enter your member passkey below.")
+        key = st.text_input("Member / Subscriber Passkey", type="password")
 
         if st.button("Unlock"):
             if key == st.secrets.get("PASSKEY"):
@@ -272,6 +273,16 @@ st.markdown("""
 Regime classification, MA5/MA20 fast confirmation, MA10/MA50 slow confirmation,
 MA200 trend filter, ATR volatility stops, take-profit zones, confidence scoring,
 psychology mapping, Sharpe ratio, and portfolio scanner.
+</div>
+""", unsafe_allow_html=True)
+st.markdown("""
+<div class="nexus-card">
+<b>How to use Nexus:</b><br><br>
+1. Use <b>Execute Nexus Scan</b> to analyze one asset like AAPL, NVDA, BTC-USD, or CL=F.<br>
+2. Review the action signal, confidence score, regime, ATR stop, take-profit level, and chart.<br>
+3. Use <b>Portfolio Scanner</b> below to build your own watchlist and scan multiple assets at once.<br>
+4. Green crosses show bullish moving-average crosses. Red X marks bearish crosses.<br><br>
+This tool is for systematic market analysis, not financial advice.
 </div>
 """, unsafe_allow_html=True)
 
@@ -348,85 +359,7 @@ scan_col, portfolio_col = st.columns([1, 1])
 
 run_single = scan_col.button("Execute Nexus Scan")
 
-st.markdown("""
-<div class="nexus-card">
-<b>Portfolio Scanner</b><br>
-Build your own watchlist, then scan multiple assets at once using the Nexus signal engine.
-</div>
-""", unsafe_allow_html=True)
 
-portfolio_input = st.text_input(
-    "Add assets to portfolio scanner",
-    placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
-)
-
-add_col, clear_col, run_col = st.columns([1, 1, 1])
-
-with add_col:
-    if st.button("Add Assets"):
-        new_assets = [
-            t.strip().upper()
-            for t in portfolio_input.split(",")
-            if t.strip()
-        ]
-
-        for asset in new_assets:
-            if asset not in st.session_state.portfolio_assets:
-                st.session_state.portfolio_assets.append(asset)
-
-        st.success("Assets added.")
-
-with clear_col:
-    if st.button("Clear Portfolio"):
-        st.session_state.portfolio_assets = []
-        st.warning("Portfolio cleared.")
-
-with run_col:
-    run_portfolio = st.button("Run Portfolio Scanner")
-
-if st.session_state.portfolio_assets:
-    st.write("Current Portfolio Scanner List:")
-    st.code(", ".join(st.session_state.portfolio_assets))
-else:
-    st.info("No assets added yet.")
-
-if run_portfolio:
-    if not st.session_state.portfolio_assets:
-        st.warning("Add at least one asset first.")
-    else:
-        try:
-            scanner = requests.get(
-                f"{base_url}/scanner",
-                params={
-                    "mode": mode,
-                    "tickers": ",".join(st.session_state.portfolio_assets)
-                },
-                timeout=90
-            ).json()
-
-            if not scanner:
-                st.warning("No scanner results returned.")
-            else:
-                st.subheader("Portfolio Scanner Results")
-
-                df = pd.DataFrame(scanner)
-
-                st.dataframe(
-                    df,
-                    use_container_width=True,
-                    hide_index=True
-                )
-
-                st.markdown("""
-                <div class="nexus-card">
-                <b>Scanner logic:</b> Your portfolio is ranked by signal confidence.
-                Higher confidence means stronger alignment between regime, slow trend,
-                fast timing, ATR risk structure, and risk-adjusted performance.
-                </div>
-                """, unsafe_allow_html=True)
-
-        except Exception as e:
-            st.error(f"Scanner failed: {e}")
 
 if run_single:
     if ticker == "SELECT ASSET":
@@ -589,3 +522,83 @@ if run_single:
     and confidence scoring to rank signal quality. This is not financial advice.
     </div>
     """, unsafe_allow_html=True)
+
+    st.markdown("""
+<div class="nexus-card">
+<b>Portfolio Scanner</b><br>
+Build your own watchlist, then scan multiple assets at once using the Nexus signal engine.
+</div>
+""", unsafe_allow_html=True)
+
+portfolio_input = st.text_input(
+    "Add assets to portfolio scanner",
+    placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
+)
+
+add_col, clear_col, run_col = st.columns([1, 1, 1])
+
+with add_col:
+    if st.button("Add Assets"):
+        new_assets = [
+            t.strip().upper()
+            for t in portfolio_input.split(",")
+            if t.strip()
+        ]
+
+        for asset in new_assets:
+            if asset not in st.session_state.portfolio_assets:
+                st.session_state.portfolio_assets.append(asset)
+
+        st.success("Assets added.")
+
+with clear_col:
+    if st.button("Clear Portfolio"):
+        st.session_state.portfolio_assets = []
+        st.warning("Portfolio cleared.")
+
+with run_col:
+    run_portfolio = st.button("Run Portfolio Scanner")
+
+if st.session_state.portfolio_assets:
+    st.write("Current Portfolio Scanner List:")
+    st.code(", ".join(st.session_state.portfolio_assets))
+else:
+    st.info("No assets added yet.")
+
+if run_portfolio:
+    if not st.session_state.portfolio_assets:
+        st.warning("Add at least one asset first.")
+    else:
+        try:
+            scanner = requests.get(
+                f"{base_url}/scanner",
+                params={
+                    "mode": mode,
+                    "tickers": ",".join(st.session_state.portfolio_assets)
+                },
+                timeout=90
+            ).json()
+
+            if not scanner:
+                st.warning("No scanner results returned.")
+            else:
+                st.subheader("Portfolio Scanner Results")
+
+                df = pd.DataFrame(scanner)
+
+                st.dataframe(
+                    df,
+                    use_container_width=True,
+                    hide_index=True
+                )
+
+                st.markdown("""
+                <div class="nexus-card">
+                <b>Scanner logic:</b> Your portfolio is ranked by signal confidence.
+                Higher confidence means stronger alignment between regime, slow trend,
+                fast timing, ATR risk structure, and risk-adjusted performance.
+                </div>
+                """, unsafe_allow_html=True)
+
+        except Exception as e:
+            st.error(f"Scanner failed: {e}")
