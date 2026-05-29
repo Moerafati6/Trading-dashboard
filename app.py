@@ -587,17 +587,28 @@ with clear_col:
     if st.button("Clear Portfolio"):
         st.session_state.portfolio_assets = []
         st.warning("Portfolio cleared.")
+member_save_email = st.text_input(
+    "Email to save portfolio",
+    value=st.session_state.user_email,
+    placeholder="Enter your email to save this portfolio",
+    key="portfolio_save_email"
+)
+
 with save_col:
     if st.button("Save Portfolio"):
-        if not st.session_state.user_email:
-            st.error("Start a trial with email first to save your portfolio.")
+        save_email = member_save_email.strip().lower()
+
+        if not save_email:
+            st.error("Enter an email above to save your portfolio.")
         else:
+            st.session_state.user_email = save_email
+
             save_portfolio(
-                st.session_state.user_email,
+                save_email,
                 st.session_state.portfolio_assets
             )
-            st.success("Portfolio saved.")
 
+            st.success("Portfolio saved.")
 with run_col:
     run_portfolio = st.button("Run Portfolio Scanner")
 
