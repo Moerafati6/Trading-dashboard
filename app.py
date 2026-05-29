@@ -174,11 +174,23 @@ with st.sidebar:
         if st.button("Start 7-Day Free Trial"):
             st.session_state.auth = True
             st.rerun()
-
-        st.link_button(
-            "Subscribe ($29/mo)",
-            "https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801"
-        )
+        st.markdown("""
+        <a href="https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801" target="_blank">
+            <button style="
+                background:#ef4444;
+                color:white;
+                border:none;
+                border-radius:12px;
+                padding:12px 18px;
+                font-weight:900;
+                width:100%;
+                cursor:pointer;
+                font-size:16px;
+            ">
+                Subscribe ($29/mo)
+             </button>
+         </a>
+         """, unsafe_allow_html=True)
     else:
         st.success("Access granted")
         if st.button("Logout"):
@@ -373,7 +385,13 @@ if run_single:
         height=680,
         paper_bgcolor="#060a12",
         plot_bgcolor="#0f172a",
-        title=f'{res["ticker"]} Price Action + Nexus Moving Average System',
+        title=dict(
+            text=f'{res["ticker"]} Price Action + Nexus Moving Average System',
+            y=0.98,
+            x=0.01,
+            xanchor="left",
+            yanchor="top"
+        ),
         xaxis_title="Date",
         yaxis_title="Price",
         font=dict(color="#f8fafc", size=15),
