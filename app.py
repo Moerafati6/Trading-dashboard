@@ -308,39 +308,53 @@ if run_single:
     fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA50"], mode="lines", name="MA50"))
     fig.add_trace(go.Scatter(x=dates, y=res["chart_data"]["MA200"], mode="lines", name="MA200"))
     # ==========================
-# CROSSOVER MARKERS
-# ==========================
+    # CROSSOVER MARKERS
+    # ==========================
 
-bull_dates = []
-bull_prices = []
-bear_dates = []
-bear_prices = []
+    bull_dates = []
+    bull_prices = []
+    bear_dates = []
+    bear_prices = []
 
-for cross in res["chart_data"].get("Crossovers", []):
+    for cross in res["chart_data"].get("Crossovers", []):
 
-    if cross["type"] == "BULLISH CROSS":
-        bull_dates.append(cross["date"])
-        bull_prices.append(cross["price"])
+        if cross["type"] == "BULLISH CROSS":
+            bull_dates.append(cross["date"])
+            bull_prices.append(cross["price"])
 
-    elif cross["type"] == "BEARISH CROSS":
-        bear_dates.append(cross["date"])
-        bear_prices.append(cross["price"])
+        elif cross["type"] == "BEARISH CROSS":
+            bear_dates.append(cross["date"])
+            bear_prices.append(cross["price"])
 
-fig.add_trace(
-    go.Scatter(
-        x=bull_dates,
-        y=bull_prices,
-        mode="markers",
-        name="Bull Cross",
-        marker=dict(
-            symbol="cross",
-            size=16,
-            color="#22c55e",
-            line=dict(width=2, color="white")
+    fig.add_trace(
+        go.Scatter(
+            x=bull_dates,
+            y=bull_prices,
+            mode="markers",
+            name="Bull Cross",
+            marker=dict(
+                symbol="cross",
+                size=16,
+                color="#22c55e",
+                line=dict(width=2, color="white")
+            )
         )
     )
-)
 
+    fig.add_trace(
+        go.Scatter(
+            x=bear_dates,
+            y=bear_prices,
+            mode="markers",
+            name="Bear Cross",
+            marker=dict(
+                symbol="x",
+                size=16,
+                color="#ef4444",
+                line=dict(width=2, color="white")
+            )
+        )
+    )
 fig.add_trace(
     go.Scatter(
         x=bear_dates,
