@@ -68,27 +68,28 @@ def run_engine(ticker: str, mode: str = "consistent"):
         return {"error": "Choose or search an asset first."}
 
     atr_mult = 2.0 if mode == "consistent" else 1.5
-df = pd.DataFrame()
 
-for attempt in range(3):
-    try:
-        df = yf.download(
-            yf_ticker,
-            period="2y",
-            interval="1d",
-            auto_adjust=True,
-            progress=False,
-        )
+    df = pd.DataFrame()
 
-        if not df.empty:
-            break
+    for attempt in range(3):
+        try:
+            df = yf.download(
+                yf_ticker,
+                period="2y",
+                interval="1d",
+                auto_adjust=True,
+                progress=False,
+            )
 
-    except Exception:
-        pass
+            if not df.empty:
+                break
 
-if df.empty or len(df) < 220:
-    return {"error": f"Data temporarily unavailable for {yf_ticker}. Try again in a few seconds."}
-    
+        except Exception:
+            pass
+
+    if df.empty or len(df) < 220:
+        return {"error": f"Data temporarily unavailable for {yf_ticker}. Try again in a few seconds."}
+
     data = pd.DataFrame(index=df.index)
     data["Open"] = np.ravel(df["Open"].values)
     data["High"] = np.ravel(df["High"].values)
@@ -123,7 +124,6 @@ if df.empty or len(df) < 220:
         atr_today = float(data["ATR"].iloc[i])
         curr = data.iloc[i]
         next_open = float(data["Open"].iloc[i + 1])
-
         if pos == 0:
             if curr["regime"] == 1 and curr["slow"] == 1 and curr["fast"] == 1:
                 pos = 1
