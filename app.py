@@ -301,7 +301,7 @@ if not st.session_state.auth:
 
     with cta2:
         st.markdown("""
-        <a href="https://buy.stripe.com/7sY14g9LV4Sq1Za2nPcs801" target="_blank">
+        <a href="https://buy.stripe.com/6oU00c1fp4SqbzK1jLcs802" target="_blank">
             <button style="
                 background:#ef4444;
                 color:white;
