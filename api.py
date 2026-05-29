@@ -68,18 +68,27 @@ def run_engine(ticker: str, mode: str = "consistent"):
         return {"error": "Choose or search an asset first."}
 
     atr_mult = 2.0 if mode == "consistent" else 1.5
+df = pd.DataFrame()
 
-    df = yf.download(
-        yf_ticker,
-        period="2y",
-        interval="1d",
-        auto_adjust=True,
-        progress=False,
-    )
+for attempt in range(3):
+    try:
+        df = yf.download(
+            yf_ticker,
+            period="2y",
+            interval="1d",
+            auto_adjust=True,
+            progress=False,
+        )
 
-    if df.empty or len(df) < 220:
-        return {"error": f"Not enough data found for {yf_ticker}"}
+        if not df.empty:
+            break
 
+    except Exception:
+        pass
+
+if df.empty or len(df) < 220:
+    return {"error": f"Data temporarily unavailable for {yf_ticker}. Try again in a few seconds."}
+    
     data = pd.DataFrame(index=df.index)
     data["Open"] = np.ravel(df["Open"].values)
     data["High"] = np.ravel(df["High"].values)
@@ -218,29 +227,30 @@ def run_engine(ticker: str, mode: str = "consistent"):
     # ==========================
     # MA CROSSOVER DETECTION
     # ==========================
+    recent = data.tail(90).copy()
 
-    data["fast_cross"] = data["fast"].diff()
+    recent["fast_cross"] = recent["fast"].diff()
 
-    bull_crosses = data[data["fast_cross"] == 2].tail(10)
-    bear_crosses = data[data["fast_cross"] == -2].tail(10)
+    bull_crosses = recent[recent["fast_cross"] == 2]
+    bear_crosses = recent[recent["fast_cross"] == -2]
 
     crossovers = []
 
     for idx, row in bull_crosses.iterrows():
-       crossovers.append({
-         "date": idx.strftime("%Y-%m-%d"),
-         "price": round(float(row["Close"]), 2),
-         "type": "BULLISH CROSS"
-    })
+        crossovers.append({
+            "date": idx.strftime("%Y-%m-%d"),
+            "price": round(float(row["Close"]), 2),
+            "type": "BULLISH CROSS"
+        })
 
     for idx, row in bear_crosses.iterrows():
         crossovers.append({
-          "date": idx.strftime("%Y-%m-%d"),
-          "price": round(float(row["Close"]), 2),
-          "type": "BEARISH CROSS"
-     })
-    recent = data.tail(90)
-
+           "date": idx.strftime("%Y-%m-%d"),
+           "price": round(float(row["Close"]), 2),
+           "type": "BEARISH CROSS"
+        })
+    
+  
     return {
         "ticker": yf_ticker,
         "mode": mode.upper(),
