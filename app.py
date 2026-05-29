@@ -355,20 +355,7 @@ if run_single:
             )
         )
     )
-fig.add_trace(
-    go.Scatter(
-        x=bear_dates,
-        y=bear_prices,
-        mode="markers",
-        name="Bear Cross",
-        marker=dict(
-            symbol="x",
-            size=16,
-            color="#ef4444",
-            line=dict(width=2, color="white")
-        )
-    )
-)
+
 
     fig.update_layout(
         template="plotly_dark",
