@@ -288,6 +288,15 @@ This tool is for systematic market analysis, not financial advice.
 
 if not st.session_state.auth:
     st.info("Start a free trial or subscribe to access the Nexus Terminal.")
+    st.markdown("### Already a member?")
+main_key = st.text_input("Member / Subscriber Passkey", type="password", key="main_passkey")
+
+if st.button("Unlock Member Access", key="main_unlock"):
+    if main_key == st.secrets.get("PASSKEY"):
+        st.session_state.auth = True
+        st.rerun()
+    else:
+        st.error("Wrong passkey")
 
     email_main = st.text_input("Email for 7-Day Free Trial", key="main_trial_email")
 
