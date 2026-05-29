@@ -567,7 +567,7 @@ portfolio_input = st.text_input(
     placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
 )
 
-add_col, clear_col, run_col = st.columns([1, 1, 1, 1])
+add_col, clear_col, save_col, run_col = st.columns([1, 1, 1, 1])
 
 with add_col:
     if st.button("Add Assets"):
