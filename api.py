@@ -215,7 +215,30 @@ def run_engine(ticker: str, mode: str = "consistent"):
     else:
         psych_score = 24
         psych_meaning = "PANIC"
+    # ==========================
+# MA CROSSOVER DETECTION
+# ==========================
 
+data["fast_cross"] = data["fast"].diff()
+
+bull_crosses = data[data["fast_cross"] == 2].tail(10)
+bear_crosses = data[data["fast_cross"] == -2].tail(10)
+
+crossovers = []
+
+for idx, row in bull_crosses.iterrows():
+    crossovers.append({
+        "date": idx.strftime("%Y-%m-%d"),
+        "price": round(float(row["Close"]), 2),
+        "type": "BULLISH CROSS"
+    })
+
+for idx, row in bear_crosses.iterrows():
+    crossovers.append({
+        "date": idx.strftime("%Y-%m-%d"),
+        "price": round(float(row["Close"]), 2),
+        "type": "BEARISH CROSS"
+    })
     recent = data.tail(90)
 
     return {
