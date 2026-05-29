@@ -267,6 +267,7 @@ for idx, row in bear_crosses.iterrows():
             "MA10": recent["MA10"].astype(float).tolist(),
             "MA50": recent["MA50"].astype(float).tolist(),
             "MA200": recent["MA200"].astype(float).tolist(),
+            "Crossovers": crossovers,
         },
     }
 
