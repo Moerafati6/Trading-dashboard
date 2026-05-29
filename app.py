@@ -197,8 +197,18 @@ def start_trial(email):
 
     return True, expires
 
-
 def check_trial(email):
+    existing = supabase.table("trials").select("*").eq("email", email).execute()
+
+    if not existing.data:
+        return False, None
+
+    trial = existing.data[0]
+    expires_at = datetime.fromisoformat(trial["expires_at"].replace("Z", "+00:00"))
+
+    return expires_at > utc_now(), expires_at
+
+
 def save_portfolio(email, assets):
     if not supabase or not email:
         return False
@@ -216,22 +226,17 @@ def load_portfolio(email):
     if not supabase or not email:
         return []
 
-    result = supabase.table("portfolios").select("*").eq("email", email).execute()
+    result = (
+        supabase.table("portfolios")
+        .select("*")
+        .eq("email", email)
+        .execute()
+    )
 
     if result.data:
         return result.data[0].get("assets", [])
 
-    return []   
-    existing = supabase.table("trials").select("*").eq("email", email).execute()
-
-    if not existing.data:
-        return False, None
-
-    trial = existing.data[0]
-    expires_at = datetime.fromisoformat(trial["expires_at"].replace("Z", "+00:00"))
-
-    return expires_at > utc_now(), expires_at
-
+    return []
 with st.sidebar:
     st.title("Nexus Terminal")
     st.caption("Quant.Rafati Signal Engine")
