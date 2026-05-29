@@ -3,7 +3,8 @@ requests
 plotly
 yfinance
 pandas
-supabase
-stripe
+numpy
 fastapi
 uvicorn
+supabase
+stripe
