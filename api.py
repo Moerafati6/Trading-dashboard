@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import yfinance as yf
+import pandas as pd
+import numpy as np
+import warnings
+
+warnings.filterwarnings("ignore")
 
 app = FastAPI()
 
@@ -11,106 +16,205 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+ASSET_MAP = {
+    "SELECT ASSET": "",
+    "NVDA": "NVDA",
+    "AMD": "AMD",
+    "AVGO": "AVGO",
+    "TSM": "TSM",
+    "MSFT": "MSFT",
+    "AAPL": "AAPL",
+    "TSLA": "TSLA",
+    "MU": "MU",
+    "SOFI": "SOFI",
+    "ONDS": "ONDS",
+    "DOCS": "DOCS",
+    "GLD": "GLD",
+    "Bitcoin": "BTC-USD",
+    "Ethereum": "ETH-USD",
+    "Solana": "SOL-USD",
+    "Avalanche": "AVAX-USD",
+    "Aave": "AAVE-USD",
+    "XRP": "XRP-USD",
+    "Dogecoin": "DOGE-USD",
+    "Crude Oil Futures": "CL=F",
+    "Gold Futures": "GC=F",
+    "Silver Futures": "SI=F",
+    "Natural Gas Futures": "NG=F",
+}
+
 @app.get("/")
 def home():
     return {"status": "Nexus API running"}
 
 @app.get("/market_movers")
 def get_movers():
-    return [
-        "SELECT TICKER",
-        "NVDA",
-        "AMD",
-        "AVGO",
-        "TSM",
-        "MSFT",
-        "AAPL",
-        "TSLA",
-        "MU",
-        "META",
-        "GOOGL"
-    ]
+    return list(ASSET_MAP.keys())
 
 @app.get("/signals")
-def get_signals(ticker: str):
-
+def get_signals(ticker: str, mode: str = "consistent"):
     try:
+        raw_ticker = ticker.strip()
+        yf_ticker = ASSET_MAP.get(raw_ticker, raw_ticker).upper()
 
-        ticker = ticker.upper().strip()
+        if yf_ticker == "":
+            return {"error": "Choose or search an asset first."}
+
+        atr_mult = 2.0 if mode == "consistent" else 1.5
 
         df = yf.download(
-            ticker,
-            period="1y",
+            yf_ticker,
+            period="2y",
             interval="1d",
             auto_adjust=True,
-            progress=False
+            progress=False,
         )
 
-        if df.empty:
-            return {"error": "Ticker not found"}
+        if df.empty or len(df) < 220:
+            return {"error": f"Not enough data found for {yf_ticker}"}
 
-        open_prices = df["Open"].squeeze()
-        high_prices = df["High"].squeeze()
-        low_prices = df["Low"].squeeze()
-        close_prices = df["Close"].squeeze()
+        data = pd.DataFrame(index=df.index)
+        data["Open"] = np.ravel(df["Open"].values)
+        data["High"] = np.ravel(df["High"].values)
+        data["Low"] = np.ravel(df["Low"].values)
+        data["Close"] = np.ravel(df["Close"].values)
 
-        latest_close = float(close_prices.iloc[-1])
-        first_close = float(close_prices.iloc[0])
+        data["MA5"] = data["Close"].rolling(5).mean()
+        data["MA20"] = data["Close"].rolling(20).mean()
+        data["MA10"] = data["Close"].rolling(10).mean()
+        data["MA50"] = data["Close"].rolling(50).mean()
+        data["MA200"] = data["Close"].rolling(200).mean()
 
-        ma200 = close_prices.rolling(200).mean()
-        latest_ma200 = float(ma200.iloc[-1])
+        hl = data["High"] - data["Low"]
+        hc = abs(data["High"] - data["Close"].shift())
+        lc = abs(data["Low"] - data["Close"].shift())
+        data["ATR"] = pd.concat([hl, hc, lc], axis=1).max(axis=1).rolling(14).mean()
 
-        regime = (
-            "BULLISH"
-            if latest_close > latest_ma200
-            else "BEARISH"
-        )
+        data = data.dropna()
 
-        annual_return = round(
-            ((latest_close / first_close) - 1) * 100,
-            2
-        )
+        data["regime"] = np.where(data["Close"] > data["MA200"], 1, -1)
+        data["fast"] = np.where(data["MA5"] > data["MA20"], 1, -1)
+        data["slow"] = np.where(data["MA10"] > data["MA50"], 1, -1)
+        data["Strategy_Return"] = 0.0
 
-        # PSYCHOLOGY ENGINE
+        pos = 0
+        entry = 0.0
+        stop = 0.0
+        trades = []
 
-        if annual_return > 40:
-            psych_score = 82
-            psych_meaning = "EUPHORIA"
+        for i in range(1, len(data) - 1):
+            price_today = float(data["Close"].iloc[i])
+            atr_today = float(data["ATR"].iloc[i])
+            curr = data.iloc[i]
+            next_open = float(data["Open"].iloc[i + 1])
 
-        elif annual_return > 20:
-            psych_score = 70
-            psych_meaning = "GREED"
+            if pos == 0:
+                if curr["regime"] == 1 and curr["slow"] == 1 and curr["fast"] == 1:
+                    pos = 1
+                    entry = next_open
+                    stop = next_open - (atr_today * atr_mult)
 
-        elif annual_return > 0:
-            psych_score = 55
-            psych_meaning = "OPTIMISM"
+                elif curr["regime"] == -1 and curr["slow"] == -1 and curr["fast"] == -1:
+                    pos = -1
+                    entry = next_open
+                    stop = next_open + (atr_today * atr_mult)
 
-        elif annual_return > -15:
-            psych_score = 40
-            psych_meaning = "FEAR"
+            elif pos == 1:
+                data.loc[data.index[i], "Strategy_Return"] = (
+                    data["Close"].iloc[i] / data["Close"].iloc[i - 1]
+                ) - 1
+
+                if price_today <= stop or curr["fast"] == -1:
+                    trades.append((price_today / entry) - 1)
+                    pos = 0
+
+            elif pos == -1:
+                data.loc[data.index[i], "Strategy_Return"] = 1 - (
+                    data["Close"].iloc[i] / data["Close"].iloc[i - 1]
+                )
+
+                if price_today >= stop or curr["fast"] == 1:
+                    trades.append((entry / price_today) - 1)
+                    pos = 0
+
+        rets = pd.Series(trades)
+        backtest_return = float((1 + rets).prod() - 1) if not rets.empty else 0.0
+
+        daily_mean = float(data["Strategy_Return"].mean())
+        daily_std = float(data["Strategy_Return"].std())
+        sharpe = float((daily_mean / daily_std) * np.sqrt(252)) if daily_std > 0 else 0.0
+
+        last = data.iloc[-1]
+        price = float(last["Close"])
+        atr = float(last["ATR"])
+
+        regime_name = "BULLISH" if last["regime"] == 1 else "BEARISH"
+
+        if last["regime"] == 1 and last["slow"] == 1 and last["fast"] == 1:
+            action = "ENTER LONG"
+            stop_level = price - (atr * atr_mult)
+            take_profit = price + (atr * atr_mult * 1.5)
+
+        elif last["regime"] == -1 and last["slow"] == -1 and last["fast"] == -1:
+            action = "ENTER SHORT"
+            stop_level = price + (atr * atr_mult)
+            take_profit = price - (atr * atr_mult * 1.5)
 
         else:
-            psych_score = 22
+            action = "WAIT / NO SIGNAL"
+            stop_level = None
+            take_profit = None
+
+        annual_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
+
+        if action == "ENTER LONG" and regime_name == "BULLISH":
+            psych_score = 72
+            psych_meaning = "GREED"
+        elif action == "ENTER SHORT" and regime_name == "BEARISH":
+            psych_score = 31
+            psych_meaning = "FEAR"
+        elif annual_return > 40:
+            psych_score = 82
+            psych_meaning = "EUPHORIA"
+        elif annual_return > 10:
+            psych_score = 62
+            psych_meaning = "OPTIMISM"
+        elif annual_return > -15:
+            psych_score = 45
+            psych_meaning = "UNCERTAINTY"
+        else:
+            psych_score = 24
             psych_meaning = "PANIC"
 
-        return {
+        recent = data.tail(90)
 
-            "ticker": ticker,
-            "regime": regime,
+        return {
+            "ticker": yf_ticker,
+            "mode": mode.upper(),
+            "price": round(price, 2),
+            "regime": regime_name,
+            "action": action,
             "psych_score": psych_score,
             "psych_meaning": psych_meaning,
-            "annual_return": annual_return,
-
+            "annual_return": round(float(annual_return), 2),
+            "backtest_return": round(backtest_return * 100, 2),
+            "sharpe": round(sharpe, 2),
+            "atr": round(atr, 2),
+            "stop_level": round(stop_level, 2) if stop_level else "N/A",
+            "take_profit": round(take_profit, 2) if take_profit else "N/A",
             "chart_data": {
-
-                "Open": open_prices.tail(60).astype(float).tolist(),
-                "High": high_prices.tail(60).astype(float).tolist(),
-                "Low": low_prices.tail(60).astype(float).tolist(),
-                "Close": close_prices.tail(60).astype(float).tolist(),
-
+                "Date": [d.strftime("%Y-%m-%d") for d in recent.index],
+                "Open": recent["Open"].astype(float).tolist(),
+                "High": recent["High"].astype(float).tolist(),
+                "Low": recent["Low"].astype(float).tolist(),
+                "Close": recent["Close"].astype(float).tolist(),
+                "MA5": recent["MA5"].astype(float).tolist(),
+                "MA20": recent["MA20"].astype(float).tolist(),
+                "MA10": recent["MA10"].astype(float).tolist(),
+                "MA50": recent["MA50"].astype(float).tolist(),
+                "MA200": recent["MA200"].astype(float).tolist(),
             },
         }
 
     except Exception as e:
-
         return {"error": str(e)}
