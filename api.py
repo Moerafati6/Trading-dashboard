@@ -200,7 +200,7 @@ def run_engine(ticker: str, mode: str = "consistent"):
         take_profit = price - (atr * atr_mult * 1.5)
 
     else:
-        action = "NEUTRAL/CHOPPED"
+        action = "NEUTRAL/CHOPPY"
         confidence = max(alignment_score, short_alignment_score)
         stop_level = None
         take_profit = None
