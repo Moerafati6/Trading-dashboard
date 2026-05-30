@@ -419,9 +419,9 @@ if run_single:
     st.subheader(f"Quantitative Analysis for {res['ticker']}")
     st.caption(f"Last Updated: {res.get('last_updated', 'N/A')}")
 
-    if res["action"] == "ENTER LONG":
+    if res["action"] == "LONG BIAS":
         st.markdown(f'<div class="signal-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
-    elif res["action"] == "ENTER SHORT":
+    elif res["action"] == "SHORT BIAS":
         st.markdown(f'<div class="short-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="wait-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
@@ -434,8 +434,8 @@ if run_single:
 
     m5, m6, m7, m8 = st.columns(4)
     m5.metric("ATR", res["atr"])
-    m6.metric("Stop Level", res["stop_level"])
-    m7.metric("Take Profit", res["take_profit"])
+    m6.metric("Risk Zone", res["stop_level"])
+    m7.metric("Target Zone", res["take_profit"])
     m8.metric("Sharpe", res["sharpe"])
 
     m9, m10 = st.columns(2)
