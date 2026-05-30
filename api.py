@@ -188,29 +188,29 @@ def run_engine(ticker: str, mode: str = "consistent"):
         short_alignment_score += 15
 
     if last["regime"] == 1 and last["slow"] == 1 and last["fast"] == 1:
-        action = "ENTER LONG"
+        action = "LONG BIAS"
         confidence = min(96, alignment_score)
         stop_level = price - (atr * atr_mult)
         take_profit = price + (atr * atr_mult * 1.5)
 
     elif last["regime"] == -1 and last["slow"] == -1 and last["fast"] == -1:
-        action = "ENTER SHORT"
+        action = "SHORT BIAS"
         confidence = min(96, short_alignment_score)
         stop_level = price + (atr * atr_mult)
         take_profit = price - (atr * atr_mult * 1.5)
 
     else:
-        action = "WAIT / NO SIGNAL"
+        action = "NEUTRAL/CHOPPED"
         confidence = max(alignment_score, short_alignment_score)
         stop_level = None
         take_profit = None
 
     asset_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
 
-    if action == "ENTER LONG":
+    if action == "LONG BIAS":
         psych_score = 72
         psych_meaning = "GREED"
-    elif action == "ENTER SHORT":
+    elif action == "SHORT BIAS":
         psych_score = 31
         psych_meaning = "FEAR"
     elif asset_return > 40:
