@@ -441,6 +441,17 @@ if run_single:
     m9, m10 = st.columns(2)
     m9.metric("Strategy Backtest Return", f'{res["backtest_return"]}%')
     m10.metric("Asset Return", f'{res["asset_return"]}%')
+    st.markdown("""
+    <div class="nexus-card">
+    <b>Confidence Score Guide:</b><br>
+    90–100 = Strong signal alignment<br>
+    70–89 = Good alignment<br>
+    50–69 = Mixed conditions<br>
+    Below 50 = Weak alignment<br><br>
+    Confidence measures how strongly regime, moving averages, momentum, volatility, and risk-adjusted performance agree.
+    It is <b>not</b> a guaranteed probability of profit.
+    </div>
+    """, unsafe_allow_html=True)
 
     dates = res["chart_data"]["Date"]
 
