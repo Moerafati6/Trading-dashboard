@@ -468,8 +468,8 @@ if run_single:
     m8.metric("Sharpe", res["sharpe"])
 
     m9, m10 = st.columns(2)
-    m9.metric("Strategy Backtest Return", f'{res["backtest_return"]}%')
-    m10.metric("Asset Return", f'{res["asset_return"]}%')
+    m9.metric("Strategy Return", f'{res["backtest_return"]}%')
+    m10.metric("Buy & Hold Return", f'{res["asset_return"]}%')
     st.markdown("""
     <div class="nexus-card">
     <b>Confidence Score Guide:</b><br>
@@ -481,6 +481,14 @@ if run_single:
     It is <b>not</b> a guaranteed probability of profit.
     </div>
     """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="nexus-card">
+    <b>Return Metrics Explained:</b><br>
+    <b>Asset Return</b> = how the asset performed over the historical test period using a simple buy-and-hold approach.<br><br>
+    <b>Strategy Backtest Return</b> = how the Nexus signal rules would have performed over the same historical period.<br><br>
+     Historical backtests are simulations and do not guarantee future results.
+     </div>
+     """, unsafe_allow_html=True)
 
     dates = res["chart_data"]["Date"]
 
