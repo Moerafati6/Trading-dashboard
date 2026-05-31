@@ -275,6 +275,21 @@ with st.sidebar:
             </button>
         </a>
         """, unsafe_allow_html=True)
+        st.markdown("""
+        <div class="nexus-card" style="font-size:15px; padding:16px;">
+        <b>Nexus Pro includes:</b><br>
+        ✓ 7-Day Free Trial<br>
+        ✓ Unlimited Asset Scans<br>
+        ✓ Stocks, Crypto, ETFs & Futures<br>
+        ✓ Portfolio Scanner<br>
+        ✓ Saved Watchlists<br>
+        ✓ Confidence Scoring<br>
+        ✓ Risk Zone & Target Zone Analysis<br>
+        ✓ Mobile Access<br><br>
+        Questions or payment support:<br>
+        <b>nexusquantitative@gmail.com</b>
+        </div>
+        """, unsafe_allow_html=True)
 
     else:
         st.success("Access granted")
@@ -360,6 +375,21 @@ if not st.session_state.auth:
             Subscribe ($29/mo)
         </button>
     </a>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="nexus-card" style="font-size:15px; padding:16px;">
+    <b>Nexus Pro includes:</b><br>
+    ✓ 7-Day Free Trial<br>
+    ✓ Unlimited Asset Scans<br>
+    ✓ Stocks, Crypto, ETFs & Futures<br>
+    ✓ Portfolio Scanner<br>
+    ✓ Saved Watchlists<br>
+    ✓ Confidence Scoring<br>
+    ✓ Risk Zone & Target Zone Analysis<br>
+    ✓ Mobile Access<br><br>
+    Questions or payment support:<br>
+    <b>nexusquantitative@gmail.com</b>
+    </div>
     """, unsafe_allow_html=True)
 
     st.stop()
