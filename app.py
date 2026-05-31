@@ -271,7 +271,7 @@ with st.sidebar:
                 font-size:16px;
                 margin-top:10px;
             ">
-                Subscribe ($29/mo)
+                Subscribe ($19.99/mo)
             </button>
         </a>
         """, unsafe_allow_html=True)
@@ -280,7 +280,7 @@ with st.sidebar:
         <b>Nexus Pro includes:</b><br>
         ✓ 7-Day Free Trial<br>
         ✓ Unlimited Asset Scans<br>
-        ✓ Stocks, Crypto, ETFs & Futures<br>
+        ✓ Stocks, Crypto, ETFs, Commodities & Futures<br>
         ✓ Portfolio Scanner<br>
         ✓ Saved Watchlists<br>
         ✓ Confidence Scoring<br>
@@ -372,7 +372,7 @@ if not st.session_state.auth:
             font-size:16px;
             margin-top:12px;
         ">
-            Subscribe ($29/mo)
+            Subscribe ($19.99/mo)
         </button>
     </a>
     """, unsafe_allow_html=True)
@@ -381,7 +381,7 @@ if not st.session_state.auth:
     <b>Nexus Pro includes:</b><br>
     ✓ 7-Day Free Trial<br>
     ✓ Unlimited Asset Scans<br>
-    ✓ Stocks, Crypto, ETFs & Futures<br>
+    ✓ Stocks, Crypto, ETFs, Commodities & Futures<br>
     ✓ Portfolio Scanner<br>
     ✓ Saved Watchlists<br>
     ✓ Confidence Scoring<br>
