@@ -691,17 +691,32 @@ if run_portfolio:
 
                 df = pd.DataFrame(scanner)
 
+                df = df.rename(columns={
+                     "ticker": "Asset",
+                     "action": "Signal",
+                     "confidence": "Confidence",
+                     "regime": "Regime",
+                     "psychology": "Psychology",
+                     "price": "Price",
+                     "atr": "Volatility",
+                     "stop_level": "Risk Zone",
+                     "take_profit": "Target Zone",
+                     "sharpe": "Sharpe",
+                     "backtest_return": "Strategy Return",
+                     "asset_return": "Buy & Hold Return"
+                })
+
                 st.dataframe(
-                    df,
-                    use_container_width=True,
-                    hide_index=True
+                      df,
+                      use_container_width=True,
+                      hide_index=True
                 )
 
                 st.markdown("""
                 <div class="nexus-card">
                 <b>Scanner logic:</b> Your portfolio is ranked by signal confidence.
                 Higher confidence means stronger alignment between regime, slow trend,
-                fast timing, ATR risk structure, and risk-adjusted performance.
+                fast timing, volatility based risk structure, and risk-adjusted performance.
                 </div>
                 """, unsafe_allow_html=True)
 
