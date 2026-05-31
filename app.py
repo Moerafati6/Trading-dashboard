@@ -303,7 +303,7 @@ st.markdown("""
 <div class="nexus-card">
 <b>Premium systematic market scanner:</b><br>
 Regime classification, MA5/MA20 fast confirmation, MA10/MA50 slow confirmation,
-MA200 trend filter, ATR volatility stops, take-profit zones, confidence scoring,
+MA200 trend filter, Volatility measurements for risk zones and target zones,
 psychology mapping, Sharpe ratio, and portfolio scanner.
 </div>
 """, unsafe_allow_html=True)
@@ -312,8 +312,8 @@ st.markdown("""
 <div class="nexus-card">
 <b>How to use Nexus:</b><br><br>
 1. Use <b>Execute Nexus Scan</b> to analyze one asset like AAPL, NVDA, BTC-USD, or CL=F.<br>
-2. Review the action signal, confidence score, regime, ATR stop, take-profit level, and chart.<br>
-3. Use <b>Portfolio Scanner</b> below to build your own watchlist and scan multiple assets at once.<br>
+2. Review the signal, confidence score, market regime, volatility level, risk zone, target zone, and chart.<br>
+3. Use <b>Portfolio Scanner</b> below to build your own Portfolio and scan multiple assets at once.<br>
 4. Green crosses show bullish moving-average crosses. Red X marks bearish crosses.<br><br>
 This tool is for systematic market analysis, not financial advice.
 </div>
@@ -412,10 +412,9 @@ choice = top1.selectbox("Popular Assets", movers)
 search = top2.text_input("Or Search Ticker", placeholder="Examples: NVDA, BTC-USD, CL=F")
 mode = top3.radio("Mode", ["consistent", "aggressive"], horizontal=False)
 st.info(
-    "Consistent = higher-confidence trend signals. "
-    "Aggressive = earlier entries with more risk and more opportunities."
+    "Consistent = higher-confidence trend signals with more confirmation.\n\n"
+    "Aggressive = earlier signals with higher risk and more opportunities."
 )
-
 ticker = search.upper().strip() if search else choice
 
 if "portfolio_assets" not in st.session_state:
@@ -450,11 +449,11 @@ if run_single:
     st.caption(f"Last Updated: {res.get('last_updated', 'N/A')}")
 
     if res["action"] == "LONG BIAS":
-        st.markdown(f'<div class="signal-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     elif res["action"] == "SHORT BIAS":
-        st.markdown(f'<div class="short-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="short-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="wait-box">ACTION: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="wait-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Regime", res["regime"])
@@ -463,7 +462,7 @@ if run_single:
     m4.metric("Mode", res["mode"])
 
     m5, m6, m7, m8 = st.columns(4)
-    m5.metric("ATR", res["atr"])
+    m5.metric("Volatility", res["atr"])
     m6.metric("Risk Zone", res["stop_level"])
     m7.metric("Target Zone", res["take_profit"])
     m8.metric("Sharpe", res["sharpe"])
