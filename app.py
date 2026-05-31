@@ -594,8 +594,8 @@ if run_single:
     <div class="nexus-card">
     <b>How to read this:</b><br>
     The engine uses MA200 for regime, MA10/MA50 for trend confirmation,
-    MA5/MA20 for timing, ATR for volatility-based stop and take-profit zones,
-    and confidence scoring to rank signal quality. This is not financial advice.
+    MA5/MA20 for timing, volatility measurements for risk zones and target zones,
+    and confidence scoring to rank signal quality.
     </div>
     """, unsafe_allow_html=True)
 
