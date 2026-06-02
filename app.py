@@ -271,7 +271,7 @@ with st.sidebar:
                 st.error("Wrong passkey")
 
         st.markdown("""
-        <a href="https://buy.stripe.com/00w6oAaPZgB86fq1jLcs803" target="_blank">
+        <a href="https://buy.stripe.com/28E14g1fpacKcDO2nPcs804" target="_blank">
             <button style="
                 background:#ef4444;
                 color:white;
@@ -375,7 +375,7 @@ if not st.session_state.auth:
                 st.error("Your free trial has expired. Subscribe to continue.")
 
     st.markdown("""
-    <a href="https://buy.stripe.com/00w6oAaPZgB86fq1jLcs803" target="_blank">
+    <a href="https://buy.stripe.com/28E14g1fpacKcDO2nPcs804" target="_blank">
         <button style="
             background:#ef4444;
             color:white;
