@@ -237,12 +237,25 @@ def load_portfolio(email):
         return result.data[0].get("assets", [])
 
     return []
+def check_subscriber(email):
+    if not supabase or not email:
+        return False
+
+    result = (
+        supabase.table("subscribers")
+        .select("*")
+        .eq("email", email)
+        .eq("status", "active")
+        .execute()
+    )
+
+    return bool(result.data)
 with st.sidebar:
     st.title("Nexus Terminal")
     st.caption("Quant.Rafati Signal Engine")
 
     if not st.session_state.auth:
-        st.caption("Already subscribed? Enter your member passkey below.")
+        st.caption("Admin Access")
 
         key = st.text_input(
             "Member / Subscriber Passkey",
@@ -323,18 +336,21 @@ if not st.session_state.auth:
     st.info("Start a free trial, subscribe, or enter your member passkey to access Nexus Terminal.")
 
     st.markdown("### Already a member?")
-    main_key = st.text_input(
-        "Member / Subscriber Passkey",
-        type="password",
-        key="main_passkey"
+    member_email = st.text_input(
+           "Member Email",
+           placeholder="Enter the email used at checkout",
+           key="main_member_email"
     )
 
     if st.button("Unlock Member Access", key="main_unlock"):
-        if main_key == st.secrets.get("PASSKEY"):
-            st.session_state.auth = True
-            st.rerun()
-        else:
-            st.error("Wrong passkey")
+           clean_email = member_email.strip().lower()
+
+           if check_subscriber(clean_email):
+                st.session_state.auth = True
+                st.session_state.user_email = clean_email
+                st.rerun()
+           else:
+               st.error("No active subscription found for this email.")
 
     st.markdown("### Start your free trial")
     email_main = st.text_input(
