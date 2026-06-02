@@ -160,6 +160,24 @@ if "auth" not in st.session_state:
     st.session_state.auth = False
 if "user_email" not in st.session_state:
     st.session_state.user_email = ""
+    admin_mode = st.query_params.get("admin") == "true"
+if admin_mode and not st.session_state.auth:
+    st.title("Nexus Admin Login")
+
+    admin_key = st.text_input(
+        "Admin Passkey",
+        type="password",
+        key="hidden_admin_passkey"
+    )
+
+    if st.button("Login as Admin", key="hidden_admin_login"):
+        if admin_key == st.secrets.get("PASSKEY"):
+            st.session_state.auth = True
+            st.rerun()
+        else:
+            st.error("Wrong admin passkey")
+
+    st.stop()
 
 supabase_url = st.secrets.get("SUPABASE_URL")
 supabase_key = st.secrets.get("SUPABASE_KEY")
@@ -255,20 +273,7 @@ with st.sidebar:
     st.caption("Quant.Rafati Signal Engine")
 
     if not st.session_state.auth:
-        st.caption("Admin Access")
-
-        key = st.text_input(
-            "Admin Passkey",
-            type="password",
-            key="sidebar_passkey"
-        )
-
-        if st.button("Unlock", key="sidebar_unlock"):
-            if key == st.secrets.get("PASSKEY"):
-                st.session_state.auth = True
-                st.rerun()
-            else:
-                st.error("Wrong passkey")
+        
 
         st.markdown("""
         <a href="https://buy.stripe.com/28E14g1fpacKcDO2nPcs804" target="_blank">
