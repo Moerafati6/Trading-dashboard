@@ -176,7 +176,7 @@ def utc_now():
 
 def start_trial(email):
     now = utc_now()
-    expires = now + timedelta(days=7)
+    expires = now + timedelta(days=3)
 
     existing = supabase.table("trials").select("*").eq("email", email).execute()
 
@@ -291,7 +291,7 @@ with st.sidebar:
         st.markdown("""
         <div class="nexus-card" style="font-size:15px; padding:16px;">
         <b>Nexus Pro includes:</b><br>
-        ✓ 7-Day Free Trial<br>
+        ✓ 3-Day Free Trial<br>
         ✓ Unlimited Asset Scans<br>
         ✓ Stocks, Crypto, ETFs, Commodities & Futures<br>
         ✓ Portfolio Scanner<br>
@@ -354,11 +354,11 @@ if not st.session_state.auth:
 
     st.markdown("### Start your free trial")
     email_main = st.text_input(
-        "Email for 7-Day Free Trial",
+        "Email for 3-Day Free Trial",
         key="main_trial_email"
     )
 
-    if st.button("Start 7-Day Free Trial", key="main_trial_button"):
+    if st.button("Start 3-Day Free Trial", key="main_trial_button"):
         if not supabase:
             st.error("Trial system is not connected yet.")
         elif not email_main:
@@ -369,7 +369,9 @@ if not st.session_state.auth:
             if active:
                 st.session_state.auth = True
                 st.session_state.user_email = email_main.strip().lower()
-                st.success(f"Trial active until {expires_at.strftime('%b %d, %Y')}")
+                st.success(
+                    f"Your 3-day trial is active until {expires_at.strftime('%b %d, %Y')}"
+                )
                 st.rerun()
             else:
                 st.error("Your free trial has expired. Subscribe to continue.")
@@ -395,7 +397,7 @@ if not st.session_state.auth:
     st.markdown("""
     <div class="nexus-card" style="font-size:15px; padding:16px;">
     <b>Nexus Pro includes:</b><br>
-    ✓ 7-Day Free Trial<br>
+    ✓ 3-Day Free Trial<br>
     ✓ Unlimited Asset Scans<br>
     ✓ Stocks, Crypto, ETFs, Commodities & Futures<br>
     ✓ Portfolio Scanner<br>
