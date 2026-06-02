@@ -158,9 +158,12 @@ a[data-testid="stLinkButton"] p {
 
 if "auth" not in st.session_state:
     st.session_state.auth = False
+
 if "user_email" not in st.session_state:
     st.session_state.user_email = ""
-    admin_mode = st.query_params.get("admin") == "true"
+
+admin_mode = st.query_params.get("admin") == "true"
+
 if admin_mode and not st.session_state.auth:
     st.title("Nexus Admin Login")
 
@@ -178,7 +181,6 @@ if admin_mode and not st.session_state.auth:
             st.error("Wrong admin passkey")
 
     st.stop()
-
 supabase_url = st.secrets.get("SUPABASE_URL")
 supabase_key = st.secrets.get("SUPABASE_KEY")
 
