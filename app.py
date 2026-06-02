@@ -258,7 +258,7 @@ with st.sidebar:
         st.caption("Admin Access")
 
         key = st.text_input(
-            "Member / Subscriber Passkey",
+            "Admin Passkey",
             type="password",
             key="sidebar_passkey"
         )
@@ -333,7 +333,7 @@ This tool is for systematic market analysis, not financial advice.
 """, unsafe_allow_html=True)
 
 if not st.session_state.auth:
-    st.info("Start a free trial, subscribe, or enter your member passkey to access Nexus Terminal.")
+    st.info("Start a free trial, subscribe, or enter your member email to access Nexus Terminal.")
 
     st.markdown("### Already a member?")
     member_email = st.text_input(
@@ -342,7 +342,7 @@ if not st.session_state.auth:
            key="main_member_email"
     )
 
-    if st.button("Unlock Member Access", key="main_unlock"):
+    if st.button("Access My Account", key="main_unlock"):
            clean_email = member_email.strip().lower()
 
            if check_subscriber(clean_email):
@@ -465,15 +465,15 @@ if run_single:
     st.caption(f"Last Updated: {res.get('last_updated', 'N/A')}")
 
     if res["action"] == "LONG BIAS":
-        st.markdown(f'<div class="signal-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="signal-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     elif res["action"] == "SHORT BIAS":
-        st.markdown(f'<div class="short-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="short-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="wait-box">LIVE SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="wait-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Regime", res["regime"])
-    m2.metric("Psychology", f'{res["psych_meaning"]} ({res["psych_score"]})')
+    m2.metric("Market Sentiment", f'{res["psych_meaning"]} ({res["psych_score"]})')
     m3.metric("Current Price", f'${res["price"]}')
     m4.metric("Mode", res["mode"])
 
@@ -501,8 +501,8 @@ if run_single:
     <div class="nexus-card">
     <b>Return Metrics Explained:</b><br>
     <b>Asset Return</b> = how the asset performed over the historical test period using a simple buy-and-hold approach.<br><br>
-    <b>Strategy Backtest Return</b> = how the Nexus signal rules would have performed over the same historical period.<br><br>
-     Historical backtests are simulations and do not guarantee future results.
+    <b>Strategy Backtest Return</b> = historical performance of Nexus rules over the same period.<br><br>
+     Historical results do not guarantee future performance.
      </div>
      """, unsafe_allow_html=True)
 
