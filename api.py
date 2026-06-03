@@ -5,6 +5,10 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import warnings
+import os
+import stripe
+from fastapi import Request
+from supabase import create_client
 
 warnings.filterwarnings("ignore")
 
@@ -16,6 +20,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+stripe_webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase = create_client(supabase_url, supabase_key)
 
 ASSET_MAP = {
     "SELECT ASSET": "",
@@ -54,7 +64,40 @@ WATCHLIST = [
 @app.get("/")
 def home():
     return {"status": "Nexus API running"}
+@app.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    payload = await request.body()
+    sig_header = request.headers.get("stripe-signature")
 
+    try:
+        event = stripe.Webhook.construct_event(
+            payload,
+            sig_header,
+            stripe_webhook_secret
+        )
+    except Exception as e:
+        return {"error": str(e)}
+
+    if event["type"] == "checkout.session.completed":
+        session = event["data"]["object"]
+
+        email = None
+
+        if session.get("customer_details"):
+            email = session["customer_details"].get("email")
+
+        if not email:
+            email = session.get("customer_email")
+
+        if email:
+            clean_email = email.strip().lower()
+
+            supabase.table("subscribers").upsert({
+                "email": clean_email,
+                "status": "active"
+            }).execute()
+
+    return {"status": "success"}
 
 @app.get("/market_movers")
 def get_movers():
