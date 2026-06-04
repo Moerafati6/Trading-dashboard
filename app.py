@@ -495,6 +495,9 @@ if run_single:
     m9, m10 = st.columns(2)
     m9.metric("Strategy Return", f'{res["backtest_return"]}%')
     m10.metric("Buy & Hold Return", f'{res["asset_return"]}%')
+    st.caption(
+    "Backtest period: ~2 years of historical data. Historical results do not guarantee future performance."
+    )
     st.markdown("""
     <div class="nexus-card">
     <b>Confidence Score Guide:</b><br>
