@@ -294,7 +294,28 @@ def run_engine(ticker: str, mode: str = "consistent"):
            "type": "BEARISH CROSS"
         })
     
-  
+    
+    confidence_reasons = []
+
+    if last["regime"] == 1:
+        confidence_reasons.append("Bullish long-term market regime")
+    else:
+        confidence_reasons.append("Bearish long-term market regime")
+
+    if last["slow"] == 1:
+        confidence_reasons.append("Trend confirmation is positive")
+    else:
+        confidence_reasons.append("Trend confirmation is negative")
+
+    if last["fast"] == 1:
+        confidence_reasons.append("Momentum is strengthening")
+    else:
+        confidence_reasons.append("Momentum is weakening")
+
+    if sharpe > 0:
+        confidence_reasons.append("Positive risk-adjusted performance")
+    else:
+        confidence_reasons.append("Weak risk-adjusted performance")
     return {
         "ticker": yf_ticker,
         "mode": mode.upper(),
@@ -303,6 +324,7 @@ def run_engine(ticker: str, mode: str = "consistent"):
         "regime": regime_name,
         "action": action,
         "confidence": int(confidence),
+        "confidence_reasons": confidence_reasons,
         "psych_score": psych_score,
         "psych_meaning": psych_meaning,
         "asset_return": round(float(asset_return), 2),
