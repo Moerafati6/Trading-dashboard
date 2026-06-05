@@ -211,14 +211,23 @@ def run_engine(ticker: str, mode: str = "consistent"):
     regime_name = "BULLISH" if last["regime"] == 1 else "BEARISH"
 
     alignment_score = 0
+    confidence_breakdown = []
+
     if last["regime"] == 1:
         alignment_score += 30
+        confidence_breakdown.append("Market Regime +30")
+
     if last["slow"] == 1:
         alignment_score += 30
+        confidence_breakdown.append("Trend Alignment +30")
+
     if last["fast"] == 1:
         alignment_score += 25
+        confidence_breakdown.append("Momentum +25")
+
     if sharpe > 0:
         alignment_score += 15
+        confidence_breakdown.append("Risk Score +15")
 
     short_alignment_score = 0
     if last["regime"] == -1:
@@ -324,7 +333,7 @@ def run_engine(ticker: str, mode: str = "consistent"):
         "regime": regime_name,
         "action": action,
         "confidence": int(confidence),
-        "confidence_reasons": confidence_reasons,
+        "confidence_breakdown": confidence_breakdown,
         "psych_score": psych_score,
         "psych_meaning": psych_meaning,
         "asset_return": round(float(asset_return), 2),
