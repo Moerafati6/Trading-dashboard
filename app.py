@@ -517,14 +517,14 @@ if run_single:
     </div>
     """, unsafe_allow_html=True)
     st.markdown(
-    f"""
-    <div class="nexus-card">
-    <b>Why Confidence = {res["confidence"]}%</b><br><br>
-    {'<br>'.join([f'✓ {x}' for x in res["confidence_reasons"]])}
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        f"""
+        <div class="nexus-card">
+        <b>Why Confidence = {res['confidence']}/100</b><br><br>
+        {'<br>'.join(res.get('confidence_breakdown', []))}
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.markdown("""
     <div class="nexus-card">
     <b>Return Metrics Explained:</b><br>
