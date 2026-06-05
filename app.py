@@ -322,9 +322,16 @@ st.title("Nexus Quantitative Engine")
 st.markdown("""
 <div class="nexus-card">
 <b>Premium systematic market scanner:</b><br>
-Regime classification, MA5/MA20 fast confirmation, MA10/MA50 slow confirmation,
-MA200 trend filter, Volatility measurements for risk zones and target zones,
-psychology mapping, Sharpe ratio, and portfolio scanner.
+Search any asset and instantly understand:
+
+• Confidence Score
+• Market Regime
+• Market Psychology
+• Risk Zones
+• Strategy Performance
+• Portfolio Rankings
+
+Built for investors who want answers, not dozens of indicators.
 </div>
 """, unsafe_allow_html=True)
 
@@ -490,7 +497,7 @@ if run_single:
     m5.metric("Volatility", res["atr"])
     m6.metric("Risk Zone", res["stop_level"])
     m7.metric("Target Zone", res["take_profit"])
-    m8.metric("Sharpe", res["sharpe"])
+    m8.metric("Risk-Adjusted Score", res["sharpe"])
 
     m9, m10 = st.columns(2)
     m9.metric("Strategy Return", f'{res["backtest_return"]}%')
@@ -509,6 +516,15 @@ if run_single:
     It is <b>not</b> a guaranteed probability of profit.
     </div>
     """, unsafe_allow_html=True)
+    st.markdown(
+    f"""
+    <div class="nexus-card">
+    <b>Why Confidence = {res["confidence"]}%</b><br><br>
+    {'<br>'.join([f'✓ {x}' for x in res["confidence_reasons"]])}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
     st.markdown("""
     <div class="nexus-card">
     <b>Return Metrics Explained:</b><br>
@@ -729,7 +745,7 @@ if run_portfolio:
                      "atr": "Volatility",
                      "stop_level": "Risk Zone",
                      "take_profit": "Target Zone",
-                     "sharpe": "Sharpe",
+                     "sharpe": "Risk Score",
                      "backtest_return": "Strategy Return",
                      "asset_return": "Buy & Hold Return"
                 })
