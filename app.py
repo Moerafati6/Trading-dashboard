@@ -675,19 +675,20 @@ if run_single:
     and confidence scoring to rank signal quality.
     </div>
     """, unsafe_allow_html=True)
-st.markdown("### Portfolio Scanner")
+
+    st.markdown("### Portfolio Scanner")
+
     st.markdown("""
-<div class="nexus-card">
-<b>Portfolio Scanner</b><br>
-Build your own watchlist, then scan multiple assets at once using the Nexus signal engine.
-</div>
-""", unsafe_allow_html=True)
+    <div class="nexus-card">
+    <b>Portfolio Scanner</b><br>
+    Build your own watchlist, then scan multiple assets at once using the Nexus signal engine.
+    </div>
+    """, unsafe_allow_html=True)
 
-portfolio_input = st.text_input(
-    "Add assets to portfolio scanner",
-    placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
-)
-
+    portfolio_input = st.text_input(
+        "Add assets to portfolio scanner",
+        placeholder="Examples: AAPL, NVDA, BTC-USD, ETH-USD, CL=F"
+    )
 add_col, clear_col, save_col, run_col = st.columns([1, 1, 1, 1])
 
 with add_col:
