@@ -511,17 +511,95 @@ if run_single:
     else:
         st.markdown(f'<div class="wait-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     st.markdown("### Signal Dashboard")
-    m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Regime", res["regime"])
-    m2.metric("Market Sentiment", f'{res["psych_meaning"]} ({res["psych_score"]})')
-    m3.metric("Current Price", f'${res["price"]}')
-    m4.metric("Daily Change", f'{res["daily_change"]}%')
+    st.markdown(f"""
+    <div style="
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:16px;
+    margin-bottom:22px;
+    ">
 
-    m5, m6, m7, m8 = st.columns(4)
-    m5.metric("Volatility", res["atr"])
-    m6.metric("Risk Zone", res["stop_level"])
-    m7.metric("Target Zone", res["take_profit"])
-    m8.metric("Risk-Adjusted Score", res["sharpe"])
+    <div class="nexus-card" style="border-color:#a855f7;">
+    🧠<br>
+    <b>Market Sentiment</b><br>
+    <span style="font-size:30px;font-weight:900;color:#d946ef;">
+    {res["psych_meaning"]} ({res["psych_score"]})
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#22c55e;">
+    💵<br>
+    <b>Current Price</b><br>
+    <span style="font-size:30px;font-weight:900;">
+    ${res["price"]}
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#facc15;">
+    📈<br>
+    <b>Daily Change</b><br>
+    <span style="font-size:30px;font-weight:900;">
+    {res["daily_change"]}%
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#3b82f6;">
+    🛡️<br>
+    <b>Risk-Adjusted Score</b><br>
+    <span style="font-size:30px;font-weight:900;color:#38bdf8;">
+    {res["sharpe"]}
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#ef4444;">
+    ⚠️<br>
+    <b>Risk Zone</b><br>
+    <span style="font-size:30px;font-weight:900;color:#f87171;">
+    {res["stop_level"]}
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#22c55e;">
+    🎯<br>
+    <b>Target Zone</b><br>
+    <span style="font-size:30px;font-weight:900;color:#4ade80;">
+    {res["take_profit"]}
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#f59e0b;">
+    ⚡<br>
+    <b>Confidence Score</b><br>
+    <span style="font-size:30px;font-weight:900;color:#fbbf24;">
+    {res["confidence"]}%
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#60a5fa;">
+    ℹ️<br>
+    <b>Market Regime</b><br>
+    <span style="font-size:30px;font-weight:900;color:#93c5fd;">
+    {res["regime"]}
+    </span>
+    </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+if res["action"] == "NEUTRAL/CHOPPY":
+    st.markdown("""
+    <div class="nexus-card" style="
+    border:1px solid #f59e0b;
+    background:linear-gradient(135deg,#1e1b04,#111827);
+    ">
+    💡 <b>Important Context:</b><br><br>
+
+    In neutral/choppy markets, confidence measures the strength
+    of the setup, not direction.
+
+    A high confidence score means conditions are improving,
+    but a clear LONG or SHORT signal has not yet formed.
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class="nexus-card">
