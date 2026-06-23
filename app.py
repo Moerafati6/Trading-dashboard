@@ -511,10 +511,10 @@ if run_single:
     <div class="nexus-card">
     <b>Confidence Score Guide:</b><br>
     90–100 = Strong signal alignment<br>
-    70–89 = Good alignment<br>
+    70–89 = Good setup strength<br>
     50–69 = Mixed conditions<br>
     Below 50 = Weak alignment<br><br>
-    Confidence measures how strongly regime, moving averages, momentum, volatility, and risk-adjusted performance agree.
+    Confidence measures overall setup strength. For Neutral/Choppy signals, a high score means strong underlying conditions, but no clear long or short direction yet.
     It is <b>not</b> a guaranteed probability of profit.
     </div>
     """, unsafe_allow_html=True)
