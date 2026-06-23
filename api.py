@@ -210,6 +210,14 @@ def run_engine(ticker: str, mode: str = "consistent"):
     
     prev_close = float(data["Close"].iloc[-2])
     daily_change = ((price / prev_close) - 1) * 100
+    volatility_pct = (atr / price) * 100
+
+    if volatility_pct < 2:
+        volatility_label = "LOW"
+    elif volatility_pct < 5:
+        volatility_label = "MEDIUM"
+    else:
+        volatility_label = "HIGH"
 
     regime_name = "BULLISH" if last["regime"] == 1 else "BEARISH"
 
@@ -251,6 +259,42 @@ def run_engine(ticker: str, mode: str = "consistent"):
         confidence = max(alignment_score, short_alignment_score)
         stop_level = None
         take_profit = None
+    grade_score = confidence
+
+    if volatility_label == "HIGH":
+        grade_score -= 10
+    elif volatility_label == "LOW":
+        grade_score += 5
+
+    if sharpe > 1:
+        grade_score += 10
+    elif sharpe < 0:
+        grade_score -= 10
+
+    if abs(daily_change) > 5:
+        grade_score -= 5
+
+    grade_score = max(0, min(100, grade_score))
+
+    if grade_score >= 90:
+        nexus_grade = "A"
+    elif grade_score >= 80:
+        nexus_grade = "B"
+    elif grade_score >= 70:
+        nexus_grade = "C"
+    elif grade_score >= 60:
+        nexus_grade = "D"
+    else:
+        nexus_grade = "F"
+
+    if nexus_grade in ["A", "B"]:
+        grade_summary = "Strong setup with favorable trend and risk conditions."
+    elif nexus_grade == "C":
+        grade_summary = "Decent setup, but conditions are mixed or need confirmation."
+    elif nexus_grade == "D":
+        grade_summary = "Weak setup with elevated risk or unclear trend."
+    else:
+        grade_summary = "Poor setup with weak alignment or high uncertainty."
     confidence_breakdown = []
 
     if action == "LONG BIAS":
@@ -327,33 +371,17 @@ def run_engine(ticker: str, mode: str = "consistent"):
         })
     
     
-    confidence_reasons = []
 
-    if last["regime"] == 1:
-        confidence_reasons.append("Bullish long-term market regime")
-    else:
-        confidence_reasons.append("Bearish long-term market regime")
-
-    if last["slow"] == 1:
-        confidence_reasons.append("Trend confirmation is positive")
-    else:
-        confidence_reasons.append("Trend confirmation is negative")
-
-    if last["fast"] == 1:
-        confidence_reasons.append("Momentum is strengthening")
-    else:
-        confidence_reasons.append("Momentum is weakening")
-
-    if sharpe > 0:
-        confidence_reasons.append("Positive risk-adjusted performance")
-    else:
-        confidence_reasons.append("Weak risk-adjusted performance")
     return {
         "ticker": yf_ticker,
         "mode": mode.upper(),
         "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "price": round(price, 2),
         "daily_change": round(daily_change, 2),
+        "volatility_pct": round(volatility_pct, 2),
+        "volatility_label": volatility_label,
+        "nexus_grade": nexus_grade,
+        "grade_summary": grade_summary,
         "regime": regime_name,
         "action": action,
         "confidence": int(confidence),
