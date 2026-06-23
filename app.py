@@ -556,6 +556,25 @@ if run_single:
     </span>
     </div>
 
+    <div class="nexus-card" style="border-color:#facc15;">
+    ⭐<br>
+    <b>Nexus Grade</b><br>
+    <span style="font-size:30px;font-weight:900;color:#facc15;">
+    {res["nexus_grade"]}
+    </span><br>
+    <span style="font-size:14px;">
+    {res["grade_summary"]}
+    </span>
+    </div>
+
+    <div class="nexus-card" style="border-color:#38bdf8;">
+    🌊<br>
+    <b>Volatility</b><br>
+    <span style="font-size:30px;font-weight:900;color:#38bdf8;">
+    {res["volatility_label"]} ({res["volatility_pct"]}%)
+    </span>
+    </div>
+
     <div class="nexus-card" style="border-color:#ef4444;">
     ⚠️<br>
     <b>Risk Zone</b><br>
@@ -622,6 +641,14 @@ if run_single:
     Below 50 = Weak alignment<br><br>
     Confidence measures overall setup strength. For Neutral/Choppy signals, a high score means strong underlying conditions, but no clear long or short direction yet.
     It is <b>not</b> a guaranteed probability of profit.
+    </div>
+    """, unsafe_allow_html=True)
+    st.markdown("""
+    <div class="nexus-card">
+    <b>Metric Guide:</b><br><br>
+    <b>Volatility</b> = how much the asset usually moves. Higher volatility means bigger price swings and higher risk.<br><br>
+    <b>Risk-Adjusted Score</b> = how clean performance is compared to volatility. Higher is better.<br><br>
+    <b>Nexus Grade</b> = a simple A–F setup grade based on confidence, trend, volatility, daily movement, and risk-adjusted performance.
     </div>
     """, unsafe_allow_html=True)
     st.markdown(
