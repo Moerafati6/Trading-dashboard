@@ -207,6 +207,9 @@ def run_engine(ticker: str, mode: str = "consistent"):
     last = data.iloc[-1]
     price = float(last["Close"])
     atr = float(last["ATR"])
+    
+    prev_close = float(data["Close"].iloc[-2])
+    daily_change = ((price / prev_close) - 1) * 100
 
     regime_name = "BULLISH" if last["regime"] == 1 else "BEARISH"
 
@@ -241,13 +244,13 @@ def run_engine(ticker: str, mode: str = "consistent"):
 
     if last["regime"] == 1 and last["slow"] == 1 and last["fast"] == 1:
         action = "LONG BIAS"
-        confidence = min(96, alignment_score)
+        confidence = min(100, alignment_score)
         stop_level = price - (atr * atr_mult)
         take_profit = price + (atr * atr_mult * 1.5)
 
     elif last["regime"] == -1 and last["slow"] == -1 and last["fast"] == -1:
         action = "SHORT BIAS"
-        confidence = min(96, short_alignment_score)
+        confidence = min(100, short_alignment_score)
         stop_level = price + (atr * atr_mult)
         take_profit = price - (atr * atr_mult * 1.5)
 
@@ -330,6 +333,7 @@ def run_engine(ticker: str, mode: str = "consistent"):
         "mode": mode.upper(),
         "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "price": round(price, 2),
+        "daily_change": round(daily_change, 2),
         "regime": regime_name,
         "action": action,
         "confidence": int(confidence),
