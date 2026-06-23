@@ -275,10 +275,10 @@ def run_engine(ticker: str, mode: str = "consistent"):
 
     else:
         if max(alignment_score, short_alignment_score) >= 30:
-            confidence_breakdown.append("Partial Market Alignment")
+            confidence_breakdown.append("Setup Strength +60")
         if sharpe > 0:
             confidence_breakdown.append("Positive Risk Score +15")
-        confidence_breakdown.append("Mixed or choppy trend signals")
+        confidence_breakdown.append("No clear directional signal yet")
 
     asset_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
 
