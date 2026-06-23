@@ -550,14 +550,7 @@ if run_single:
         """,
         unsafe_allow_html=True
     )
-    st.markdown("""
-    <div class="nexus-card">
-    <b>Return Metrics Explained:</b><br>
-    <b>Asset Return</b> = how the asset performed over the historical test period using a simple buy-and-hold approach.<br><br>
-    <b>Strategy Backtest Return</b> = historical performance of Nexus rules over the same period.<br><br>
-     Historical results do not guarantee future performance.
-     </div>
-     """, unsafe_allow_html=True)
+   
     st.markdown("### Technical Chart")
     dates = res["chart_data"]["Date"]
 
