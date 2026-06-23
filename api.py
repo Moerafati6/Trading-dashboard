@@ -214,23 +214,14 @@ def run_engine(ticker: str, mode: str = "consistent"):
     regime_name = "BULLISH" if last["regime"] == 1 else "BEARISH"
 
     alignment_score = 0
-    confidence_breakdown = []
-
     if last["regime"] == 1:
         alignment_score += 30
-        confidence_breakdown.append("Market Regime +30")
-
     if last["slow"] == 1:
         alignment_score += 30
-        confidence_breakdown.append("Trend Alignment +30")
-
     if last["fast"] == 1:
         alignment_score += 25
-        confidence_breakdown.append("Momentum +25")
-
     if sharpe > 0:
         alignment_score += 15
-        confidence_breakdown.append("Risk Score +15")
 
     short_alignment_score = 0
     if last["regime"] == -1:
@@ -240,7 +231,8 @@ def run_engine(ticker: str, mode: str = "consistent"):
     if last["fast"] == -1:
         short_alignment_score += 25
     if sharpe > 0:
-        short_alignment_score += 15
+         short_alignment_score += 15
+
 
     if last["regime"] == 1 and last["slow"] == 1 and last["fast"] == 1:
         action = "LONG BIAS"
@@ -259,6 +251,34 @@ def run_engine(ticker: str, mode: str = "consistent"):
         confidence = max(alignment_score, short_alignment_score)
         stop_level = None
         take_profit = None
+    confidence_breakdown = []
+
+    if action == "LONG BIAS":
+        if last["regime"] == 1:
+            confidence_breakdown.append("Market Regime +30")
+        if last["slow"] == 1:
+            confidence_breakdown.append("Trend Alignment +30")
+        if last["fast"] == 1:
+            confidence_breakdown.append("Momentum +25")
+        if sharpe > 0:
+            confidence_breakdown.append("Risk Score +15")
+
+    elif action == "SHORT BIAS":
+        if last["regime"] == -1:
+            confidence_breakdown.append("Market Regime +30")
+        if last["slow"] == -1:
+            confidence_breakdown.append("Trend Alignment +30")
+        if last["fast"] == -1:
+            confidence_breakdown.append("Momentum +25")
+        if sharpe > 0:
+            confidence_breakdown.append("Risk Score +15")
+
+    else:
+        if max(alignment_score, short_alignment_score) >= 30:
+            confidence_breakdown.append("Partial Market Alignment")
+        if sharpe > 0:
+            confidence_breakdown.append("Positive Risk Score +15")
+        confidence_breakdown.append("Mixed or choppy trend signals")
 
     asset_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
 
