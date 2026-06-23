@@ -41,11 +41,19 @@ label, p, span {
 }
 
 div[data-testid="stMetric"] {
-    background: linear-gradient(135deg, #10203f, #172554);
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #38bdf8;
-    box-shadow: 0 0 22px rgba(56, 189, 248, 0.20);
+    background:
+        radial-gradient(circle at top left,
+        rgba(59,130,246,0.30),
+        transparent 40%),
+        linear-gradient(135deg,#07111f,#10203f);
+
+    padding: 24px;
+    border-radius: 22px;
+    border: 1px solid rgba(56,189,248,0.65);
+
+    box-shadow:
+        0 0 28px rgba(37,99,235,0.25),
+        inset 0 0 15px rgba(59,130,246,0.10);
 }
 
 div[data-testid="stMetricLabel"] {
@@ -95,52 +103,67 @@ div[data-baseweb="select"] > div {
 }
 
 .nexus-card {
-    background: linear-gradient(135deg, #0f172a, #111827);
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #334155;
-    margin-bottom: 22px;
-    color: #f8fafc;
-    font-size: 17px;
+    background:
+        radial-gradient(circle at top left,
+        rgba(56,189,248,0.15),
+        transparent 35%),
+        linear-gradient(135deg,#08111f,#111827);
+
+    padding: 24px;
+    border-radius: 22px;
+
+    border: 1px solid rgba(56,189,248,0.40);
+
+    box-shadow:
+        0 0 25px rgba(56,189,248,0.12);
 }
 
 .signal-box {
-    background: linear-gradient(135deg, #052e16, #14532d);
-    color: white;
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #22c55e;
-    font-size: 30px;
-    font-weight: 950;
-    text-align: center;
-    margin-bottom: 22px;
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.25);
+    background: linear-gradient(135deg,#064e3b,#166534);
+    color:white;
+    padding:28px;
+    border-radius:22px;
+    border:1px solid #22c55e;
+
+    box-shadow:
+        0 0 40px rgba(34,197,94,0.40);
+
+    font-size:32px;
+    font-weight:950;
+    text-align:center;
+    margin-bottom:22px;
 }
 
 .wait-box {
-    background: linear-gradient(135deg, #422006, #713f12);
-    color: white;
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #f59e0b;
-    font-size: 30px;
-    font-weight: 950;
-    text-align: center;
-    margin-bottom: 22px;
-    box-shadow: 0 0 30px rgba(245, 158, 11, 0.25);
+    background: linear-gradient(135deg,#064e3b,#166534);
+    color:white;
+    padding:28px;
+    border-radius:22px;
+    border:1px solid #22c55e;
+
+    box-shadow:
+        0 0 40px rgba(34,197,94,0.40);
+
+    font-size:32px;
+    font-weight:950;
+    text-align:center;
+    margin-bottom:22px;
 }
 
 .short-box {
-    background: linear-gradient(135deg, #450a0a, #7f1d1d);
-    color: white;
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #ef4444;
-    font-size: 30px;
-    font-weight: 950;
-    text-align: center;
-    margin-bottom: 22px;
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.25);
+    background: linear-gradient(135deg,#064e3b,#166534);
+    color:white;
+    padding:28px;
+    border-radius:22px;
+    border:1px solid #22c55e;
+
+    box-shadow:
+        0 0 40px rgba(34,197,94,0.40);
+
+    font-size:32px;
+    font-weight:950;
+    text-align:center;
+    margin-bottom:22px;
 }
 a[data-testid="stLinkButton"] {
     background: #2563eb !important;
@@ -487,7 +510,7 @@ if run_single:
         st.markdown(f'<div class="short-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="wait-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
-
+    st.markdown("### Signal Dashboard")
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Regime", res["regime"])
     m2.metric("Market Sentiment", f'{res["psych_meaning"]} ({res["psych_score"]})')
@@ -535,7 +558,7 @@ if run_single:
      Historical results do not guarantee future performance.
      </div>
      """, unsafe_allow_html=True)
-
+    st.markdown("### Technical Chart")
     dates = res["chart_data"]["Date"]
 
     fig = go.Figure()
@@ -652,7 +675,7 @@ if run_single:
     and confidence scoring to rank signal quality.
     </div>
     """, unsafe_allow_html=True)
-
+st.markdown("### Portfolio Scanner")
     st.markdown("""
 <div class="nexus-card">
 <b>Portfolio Scanner</b><br>
