@@ -500,12 +500,13 @@ if run_single:
     m7.metric("Target Zone", res["take_profit"])
     m8.metric("Risk-Adjusted Score", res["sharpe"])
 
-    m9, m10 = st.columns(2)
-    m9.metric("Strategy Return", f'{res["backtest_return"]}%')
-    m10.metric("Buy & Hold Return", f'{res["asset_return"]}%')
-    st.caption(
-    "Backtest period: ~2 years of historical data. Historical results do not guarantee future performance."
-    )
+    st.markdown(f"""
+    <div class="nexus-card">
+    <b>Historical Context:</b><br>
+    Over the last ~2 years, this asset returned <b>{res["asset_return"]}%</b> using a simple buy-and-hold approach.<br><br>
+    Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
+    </div>
+    """, unsafe_allow_html=True)
     st.markdown("""
     <div class="nexus-card">
     <b>Confidence Score Guide:</b><br>
