@@ -280,9 +280,9 @@ def run_engine(ticker: str, mode: str = "consistent"):
         nexus_grade = "A"
     elif grade_score >= 80:
         nexus_grade = "B"
-    elif grade_score >= 70:
+    elif grade_score >= 65:
         nexus_grade = "C"
-    elif grade_score >= 60:
+    elif grade_score >= 50:
         nexus_grade = "D"
     else:
         nexus_grade = "F"
