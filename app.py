@@ -119,51 +119,42 @@ div[data-baseweb="select"] > div {
 }
 
 .signal-box {
-    background: linear-gradient(135deg,#064e3b,#166534);
-    color:white;
-    padding:28px;
-    border-radius:22px;
-    border:1px solid #22c55e;
-
-    box-shadow:
-        0 0 40px rgba(34,197,94,0.40);
-
-    font-size:32px;
-    font-weight:950;
-    text-align:center;
-    margin-bottom:22px;
-}
-
-.wait-box {
-    background: linear-gradient(135deg,#064e3b,#166534);
-    color:white;
-    padding:28px;
-    border-radius:22px;
-    border:1px solid #22c55e;
-
-    box-shadow:
-        0 0 40px rgba(34,197,94,0.40);
-
-    font-size:32px;
-    font-weight:950;
-    text-align:center;
-    margin-bottom:22px;
+    background: linear-gradient(135deg, #052e16, #166534);
+    color: white;
+    padding: 28px;
+    border-radius: 22px;
+    border: 1px solid #22c55e;
+    font-size: 32px;
+    font-weight: 950;
+    text-align: center;
+    margin-bottom: 22px;
+    box-shadow: 0 0 40px rgba(34, 197, 94, 0.40);
 }
 
 .short-box {
-    background: linear-gradient(135deg,#064e3b,#166534);
-    color:white;
-    padding:28px;
-    border-radius:22px;
-    border:1px solid #22c55e;
+    background: linear-gradient(135deg, #450a0a, #7f1d1d);
+    color: white;
+    padding: 28px;
+    border-radius: 22px;
+    border: 1px solid #ef4444;
+    font-size: 32px;
+    font-weight: 950;
+    text-align: center;
+    margin-bottom: 22px;
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.40);
+}
 
-    box-shadow:
-        0 0 40px rgba(34,197,94,0.40);
-
-    font-size:32px;
-    font-weight:950;
-    text-align:center;
-    margin-bottom:22px;
+.wait-box {
+    background: linear-gradient(135deg, #422006, #713f12);
+    color: white;
+    padding: 28px;
+    border-radius: 22px;
+    border: 1px solid #f59e0b;
+    font-size: 32px;
+    font-weight: 950;
+    text-align: center;
+    margin-bottom: 22px;
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.40);
 }
 a[data-testid="stLinkButton"] {
     background: #2563eb !important;
@@ -505,11 +496,25 @@ if run_single:
     st.caption(f"Last Updated: {res.get('last_updated', 'N/A')}")
 
     if res["action"] == "LONG BIAS":
-        st.markdown(f'<div class="signal-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        signal_class = "signal-box"
+        signal_icon = "📈"
     elif res["action"] == "SHORT BIAS":
-        st.markdown(f'<div class="short-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        signal_class = "short-box"
+        signal_icon = "📉"
     else:
-        st.markdown(f'<div class="wait-box">MARKET SIGNAL: {res["action"]} | CONFIDENCE: {res["confidence"]}%</div>', unsafe_allow_html=True)
+        signal_class = "wait-box"
+        signal_icon = "⚠️"
+
+    st.markdown(
+        f"""
+        <div class="{signal_class}">
+            <span style="font-size:34px;">{signal_icon}</span>
+            &nbsp; MARKET SIGNAL: {res["action"]} |
+            CONFIDENCE: {res["confidence"]}%
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
     st.markdown("### Signal Dashboard")
     st.markdown(f"""
     <div style="
