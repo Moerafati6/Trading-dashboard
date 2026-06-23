@@ -340,10 +340,10 @@ Search any asset and instantly understand:
 
 • Confidence Score
 • Market Regime
-• Market Psychology
+• Market Sentiment
 • Risk Zones
-• Strategy Performance
-• Portfolio Rankings
+• Historical Context
+• Portfolio Scanner
 
 Built for investors who want answers, not dozens of indicators.
 </div>
@@ -869,7 +869,7 @@ if run_portfolio:
                      "action": "Signal",
                      "confidence": "Confidence",
                      "regime": "Regime",
-                     "psychology": "Psychology",
+                     "psychology": "Market Sentiment",
                      "price": "Price",
                      "atr": "Volatility",
                      "stop_level": "Risk Zone",
