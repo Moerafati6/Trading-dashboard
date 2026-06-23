@@ -585,21 +585,21 @@ if run_single:
 
     </div>
     """, unsafe_allow_html=True)
-if res["action"] == "NEUTRAL/CHOPPY":
-    st.markdown("""
-    <div class="nexus-card" style="
-    border:1px solid #f59e0b;
-    background:linear-gradient(135deg,#1e1b04,#111827);
-    ">
-    💡 <b>Important Context:</b><br><br>
+    if res["action"] == "NEUTRAL/CHOPPY":
+        st.markdown("""
+        <div class="nexus-card" style="
+        border:1px solid #f59e0b;
+        background:linear-gradient(135deg,#1e1b04,#111827);
+        ">
+        💡 <b>Important Context:</b><br><br>
 
-    In neutral/choppy markets, confidence measures the strength
-    of the setup, not direction.
+        In neutral/choppy markets, confidence measures the strength
+        of the setup, not direction.
 
-    A high confidence score means conditions are improving,
-    but a clear LONG or SHORT signal has not yet formed.
-    </div>
-    """, unsafe_allow_html=True)
+        A high confidence score means conditions are improving,
+        but a clear LONG or SHORT signal has not yet formed.
+        </div>
+        """, unsafe_allow_html=True)
 
     st.markdown(f"""
     <div class="nexus-card">
