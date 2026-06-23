@@ -651,6 +651,30 @@ if run_single:
     <b>Nexus Grade</b> = a simple A–F setup grade based on confidence, trend, volatility, daily movement, and risk-adjusted performance.
     </div>
     """, unsafe_allow_html=True)
+    with st.expander("What does Risk-Adjusted Score mean?"):
+        st.markdown("""
+        **Risk-Adjusted Score Guide**
+
+        - **Above 1.0** = Strong historical risk-adjusted performance
+        - **0.5 - 1.0** = Acceptable performance
+        - **0 - 0.5** = Weak performance
+        - **Below 0** = Historically poor risk-adjusted performance
+
+        This measures how efficiently returns were generated relative to risk.
+        Higher scores indicate better historical consistency.
+        """)
+
+    with st.expander("What does Market Sentiment mean?"):
+        st.markdown("""
+        **Market Sentiment Guide**
+
+        - **Euphoria (80-100):** Extremely optimistic; overextension risk rises.
+        - **Greed (65-79):** Bullish sentiment dominates.
+        - **Optimism (50-64):** Positive but moderate conditions.
+        - **Uncertainty (35-49):** Mixed and indecisive behavior.
+        - **Fear (20-34):** Defensive market behavior.
+        - **Panic (0-19):** Extreme pessimism and elevated stress.
+        """)
     st.markdown(
         f"""
         <div class="nexus-card">
