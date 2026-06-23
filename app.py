@@ -442,6 +442,7 @@ top1, top2, top3 = st.columns([1.25, 1.25, 0.7])
 
 choice = top1.selectbox("Popular Assets", movers)
 search = top2.text_input("Or Search Ticker", placeholder="Examples: NVDA, BTC-USD, CL=F")
+st.caption("Tip: Use ticker symbols like AAPL, NVDA, SPY, BTC-USD, ETH-USD, or CL=F. You can find tickers on Yahoo Finance, Google Finance, or your brokerage app.")
 mode = top3.radio("Mode", ["consistent", "aggressive"], horizontal=False)
 st.info(
     "Consistent = higher-confidence trend signals with more confirmation.\n\n"
@@ -491,7 +492,7 @@ if run_single:
     m1.metric("Regime", res["regime"])
     m2.metric("Market Sentiment", f'{res["psych_meaning"]} ({res["psych_score"]})')
     m3.metric("Current Price", f'${res["price"]}')
-    m4.metric("Mode", res["mode"])
+    m4.metric("Daily Change", f'{res["daily_change"]}%')
 
     m5, m6, m7, m8 = st.columns(4)
     m5.metric("Volatility", res["atr"])
