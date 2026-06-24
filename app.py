@@ -467,10 +467,15 @@ ticker = search.upper().strip() if search else choice
 if "portfolio_assets" not in st.session_state:
     st.session_state.portfolio_assets = ["AAPL", "NVDA", "MSFT", "BTC-USD", "ETH-USD"]
 
-scan_col, portfolio_col = st.columns([1, 1])
+date_col, scan_col = st.columns([1, 1])
+
+custom_start_date = date_col.date_input(
+    "Return since",
+    value=datetime.now().date() - timedelta(days=365),
+    help="Choose a date to see how the asset performed from that point to today."
+)
 
 run_single = scan_col.button("Execute Nexus Scan")
-
 
 
 if run_single:
@@ -626,13 +631,20 @@ if run_single:
         </div>
         """, unsafe_allow_html=True)
 
-    st.markdown(f"""
-    <div class="nexus-card">
-    <b>Historical Context:</b><br>
-    Over the last ~2 years, this asset returned <b>{res["asset_return"]}%</b> using a simple buy-and-hold approach.<br><br>
-    Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
-    </div>
-    """, unsafe_allow_html=True)
+   custom_return_text = ""
+   if res.get("custom_return") is not None:
+       custom_return_text = f"""
+       Since <b>{res["custom_start"]}</b>, this asset returned <b>{res["custom_return"]}%</b>.<br><br>
+       """
+
+   st.markdown(f"""
+   <div class="nexus-card">
+   <b>Historical Context:</b><br>
+   Over the last ~2 years, this asset returned <b>{res["asset_return"]}%</b> using a simple buy-and-hold approach.<br><br>
+   {custom_return_text}
+   Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
+   </div>
+   """, unsafe_allow_html=True)
     
     with st.expander("What does Confidence Score mean?"):
         st.markdown("""
