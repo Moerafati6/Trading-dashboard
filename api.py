@@ -107,6 +107,12 @@ def get_movers():
 def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
     raw_ticker = ticker.strip()
     yf_ticker = ASSET_MAP.get(raw_ticker, raw_ticker).upper()
+    exchange = "N/A"
+    try:
+        ticker_info = yf.Ticker(yf_ticker).info
+        exchange = ticker_info.get("exchange", "N/A")
+    except Exception:
+        exchange = "N/A"
 
     if yf_ticker == "":
         return {"error": "Choose or search an asset first."}
@@ -324,7 +330,14 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
             confidence_breakdown.append("Positive Risk Score +15")
         confidence_breakdown.append("No clear directional signal yet")
 
-    asset_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
+    two_year_date = data.index[-1] - pd.DateOffset(years=2)
+    two_year_data = data[data.index >= two_year_date]
+
+    if not two_year_data.empty:
+        two_year_start_price = float(two_year_data["Close"].iloc[0])
+        asset_return = ((price / two_year_start_price) - 1) * 100
+    else:
+        asset_return = 0.0
 
     custom_return = None
 
@@ -387,6 +400,7 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
 
     return {
         "ticker": yf_ticker,
+        "exchange": exchange,
         "mode": mode.upper(),
         "last_updated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         "price": round(price, 2),
