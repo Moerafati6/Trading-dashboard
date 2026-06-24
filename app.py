@@ -457,8 +457,8 @@ if not st.session_state.auth:
                     st.rerun()
                 else:
                     st.error("Your free trial has expired. Subscribe to continue.")
-             else:
-                 st.error("Invalid verification code.")
+            else:
+                st.error("Invalid verification code.")
 
     st.markdown("""
     <a href="https://buy.stripe.com/28E14g1fpacKcDO2nPcs804" target="_blank">
