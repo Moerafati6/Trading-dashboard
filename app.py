@@ -635,20 +635,20 @@ if run_single:
         </div>
         """, unsafe_allow_html=True)
 
-   custom_return_text = ""
-   if res.get("custom_return") is not None:
-       custom_return_text = f"""
-       Since <b>{res["custom_start"]}</b>, this asset returned <b>{res["custom_return"]}%</b>.<br><br>
-       """
+    custom_return_text = ""
+    if res.get("custom_return") is not None:
+        custom_return_text = f"""
+        Since <b>{res["custom_start"]}</b>, this asset returned <b>{res["custom_return"]}%</b>.<br><br>
+        """
 
-   st.markdown(f"""
-   <div class="nexus-card">
-   <b>Historical Context:</b><br>
-   Over the last ~2 years, this asset returned <b>{res["asset_return"]}%</b> using a simple buy-and-hold approach.<br><br>
-   {custom_return_text}
-   Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
-   </div>
-   """, unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="nexus-card">
+    <b>Historical Context:</b><br>
+    Over the last ~2 years, this asset returned <b>{res["asset_return"]}%</b> using a simple buy-and-hold approach.<br><br>
+    {custom_return_text}
+    Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
+    </div>
+    """, unsafe_allow_html=True)
     
     with st.expander("What does Confidence Score mean?"):
         st.markdown("""
