@@ -556,16 +556,17 @@ if run_single:
     </span>
     </div>
 
-    <div class="nexus-card" style="border-color:#facc15;">
-    ⭐<br>
-    <b>Nexus Grade</b><br>
-    <span style="font-size:30px;font-weight:900;color:#facc15;">
-    {res["nexus_grade"]}
-    </span><br>
-    <span style="font-size:14px;">
-    {res["grade_summary"]}
-    </span>
-    </div>
+   <div class="nexus-card" style="border-color:#facc15;">
+   ⭐<br>
+   <b>Nexus Setup Grade</b><br>
+   <span style="font-size:30px;font-weight:900;color:#facc15;">
+   {res["nexus_grade"]}
+   </span><br>
+   <span style="font-size:14px;">
+   {res["grade_summary"]}
+   <br><small>Grades the current setup, not long-term company value.</small>
+   </span>
+   </div>
 
     <div class="nexus-card" style="border-color:#38bdf8;">
     🌊<br>
@@ -632,25 +633,45 @@ if run_single:
     Nexus uses historical data, moving averages, market regime, volatility, and risk-adjusted performance to support the current market signal.
     </div>
     """, unsafe_allow_html=True)
-    st.markdown("""
-    <div class="nexus-card">
-    <b>Confidence Score Guide:</b><br>
-    90–100 = Strong signal alignment<br>
-    70–89 = Good setup strength<br>
-    50–69 = Mixed conditions<br>
-    Below 50 = Weak alignment<br><br>
-    Confidence measures overall setup strength. For Neutral/Choppy signals, a high score means strong underlying conditions, but no clear long or short direction yet.
-    It is <b>not</b> a guaranteed probability of profit.
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown("""
-    <div class="nexus-card">
-    <b>Metric Guide:</b><br><br>
-    <b>Volatility</b> = how much the asset usually moves. Higher volatility means bigger price swings and higher risk.<br><br>
-    <b>Risk-Adjusted Score</b> = how clean performance is compared to volatility. Higher is better.<br><br>
-    <b>Nexus Grade</b> = a simple A–F setup grade based on confidence, trend, volatility, daily movement, and risk-adjusted performance.
-    </div>
-    """, unsafe_allow_html=True)
+    
+    with st.expander("What does Confidence Score mean?"):
+        st.markdown("""
+        **Confidence Score Guide**
+
+        - **90–100** = Strong signal alignment
+        - **70–89** = Good setup strength
+        - **50–69** = Mixed conditions
+        - **Below 50** = Weak alignment
+
+        Confidence measures overall setup strength. For Neutral/Choppy signals, a high score means strong underlying conditions, but no clear long or short direction yet.
+
+        It is not a guaranteed probability of profit.
+        """)
+
+    with st.expander("What does Volatility mean?"):
+        st.markdown("""
+        **Volatility Guide**
+
+        Volatility measures how much the asset usually moves.
+
+        - **Low** = smaller price swings
+        - **Medium** = normal/moderate movement
+        - **High** = bigger price swings and higher risk
+        """)
+
+    with st.expander("What does Nexus Setup Grade mean?"):
+        st.markdown("""
+        **Nexus Setup Grade**
+
+        The grade summarizes the current setup using confidence, trend, volatility, daily movement, and risk-adjusted performance.
+ 
+        It does **not** grade the company’s long-term value.
+
+        - **A/B** = stronger current setup
+        - **C** = mixed or decent setup
+        - **D/F** = weaker setup or higher uncertainty
+        """)
+    
     with st.expander("What does Risk-Adjusted Score mean?"):
         st.markdown("""
         **Risk-Adjusted Score Guide**
