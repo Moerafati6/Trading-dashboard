@@ -486,7 +486,11 @@ if run_single:
     try:
         res = requests.get(
             f"{base_url}/signals",
-            params={"ticker": ticker, "mode": mode},
+            params={
+                "ticker": ticker,
+                "mode": mode,
+                "custom_start": custom_start_date.strftime("%Y-%m-%d")
+            },
             timeout=30
         ).json()
     except Exception as e:
