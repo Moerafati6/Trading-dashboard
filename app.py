@@ -176,7 +176,12 @@ if "auth" not in st.session_state:
 
 if "user_email" not in st.session_state:
     st.session_state.user_email = ""
+if "pending_trial_email" not in st.session_state:
+    st.session_state.pending_trial_email = ""
 
+if "trial_code_sent" not in st.session_state:
+    st.session_state.trial_code_sent = False
+    
 admin_mode = st.query_params.get("admin") == "true"
 
 if admin_mode and not st.session_state.auth:
@@ -285,6 +290,31 @@ def check_subscriber(email):
     )
 
     return bool(result.data)
+
+def send_trial_code(email):
+    try:
+        supabase.auth.sign_in_with_otp({
+            "email": email,
+            "options": {
+                "should_create_user": True
+            }
+        })
+        return True
+    except Exception as e:
+        st.error(f"Could not send verification code: {e}")
+        return False
+
+
+def verify_trial_code(email, code):
+    try:
+        result = supabase.auth.verify_otp({
+            "email": email,
+            "token": code,
+            "type": "email"
+        })
+        return result.user is not None
+    except Exception:
+        return False
 with st.sidebar:
     st.title("Nexus Terminal")
     st.caption("Quant.Rafati Signal Engine")
@@ -382,30 +412,53 @@ if not st.session_state.auth:
                st.error("No active subscription found for this email.")
 
     st.markdown("### Start your free trial")
+
     email_main = st.text_input(
-        "Email for 3-Day Free Trial",
-        key="main_trial_email"
+         "Email for 3-Day Free Trial",
+         key="main_trial_email"
     )
 
-    if st.button("Start 3-Day Free Trial", key="main_trial_button"):
+    if st.button("Send Verification Code", key="send_trial_code"):
+        clean_email = email_main.strip().lower()
+
         if not supabase:
             st.error("Trial system is not connected yet.")
-        elif not email_main:
+        elif not clean_email:
             st.error("Enter your email first.")
-        elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email_main.strip().lower()):
+        elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", clean_email):
             st.error("Enter a valid email address.")
         else:
-            active, expires_at = start_trial(email_main.strip().lower())
+            sent = send_trial_code(clean_email)
 
-            if active:
-                st.session_state.auth = True
-                st.session_state.user_email = email_main.strip().lower()
-                st.success(
-                    f"Your 3-day trial is active until {expires_at.strftime('%b %d, %Y')}"
-                )
-                st.rerun()
-            else:
-                st.error("Your free trial has expired. Subscribe to continue.")
+            if sent:
+                st.session_state.pending_trial_email = clean_email
+                st.session_state.trial_code_sent = True
+                st.success("Verification code sent. Check your email.")
+
+    if st.session_state.trial_code_sent:
+        code = st.text_input(
+            "Enter verification code",
+            key="trial_verification_code"
+        )
+
+        if st.button("Verify & Start Trial", key="verify_trial_button"):
+            email_to_verify = st.session_state.pending_trial_email
+ 
+            if verify_trial_code(email_to_verify, code.strip()):
+                active, expires_at = start_trial(email_to_verify)
+
+                if active:
+                    st.session_state.auth = True
+                    st.session_state.user_email = email_to_verify
+                    st.session_state.trial_code_sent = False
+                    st.success(
+                        f"Your 3-day trial is active until {expires_at.strftime('%b %d, %Y')}"
+                    )
+                    st.rerun()
+                else:
+                    st.error("Your free trial has expired. Subscribe to continue.")
+             else:
+                 st.error("Invalid verification code.")
 
     st.markdown("""
     <a href="https://buy.stripe.com/28E14g1fpacKcDO2nPcs804" target="_blank">
