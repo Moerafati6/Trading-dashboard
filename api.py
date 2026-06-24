@@ -119,7 +119,7 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
         try:
             df = yf.download(
                 yf_ticker,
-                period="2y",
+                period="max",
                 interval="1d",
                 auto_adjust=True,
                 progress=False,
