@@ -307,7 +307,7 @@ def send_trial_code(email):
     resend.api_key = st.secrets.get("RESEND_API_KEY")
 
     resend.Emails.send({
-        "from": "Nexus Quantitative <onboarding@resend.dev>",
+        "from": "Nexus Quantitative <noreply@nexusquantitative.com>",
         "to": email,
         "subject": "Your Nexus verification code",
         "html": f"""
@@ -426,20 +426,23 @@ if not st.session_state.auth:
 
     st.markdown("### Already a member?")
     member_email = st.text_input(
-           "Member Email",
-           placeholder="Enter the email used at checkout",
+           "Member or Trial Email",
+           placeholder="Enter the email used for checkout or trial",
            key="main_member_email"
     )
 
     if st.button("Access My Account", key="main_unlock"):
            clean_email = member_email.strip().lower()
 
-           if check_subscriber(clean_email):
-                st.session_state.auth = True
-                st.session_state.user_email = clean_email
-                st.rerun()
-           else:
-               st.error("No active subscription found for this email.")
+    is_subscriber = check_subscriber(clean_email)
+    trial_active, trial_expires = check_trial(clean_email)
+
+    if is_subscriber or trial_active:
+        st.session_state.auth = True
+        st.session_state.user_email = clean_email
+        st.rerun()
+    else:
+        st.error("No active subscription or active trial found for this email.")
 
     st.markdown("### Start your free trial")
 
