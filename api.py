@@ -104,7 +104,7 @@ def get_movers():
     return list(ASSET_MAP.keys())
 
 
-def run_engine(ticker: str, mode: str = "consistent"):
+def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
     raw_ticker = ticker.strip()
     yf_ticker = ASSET_MAP.get(raw_ticker, raw_ticker).upper()
 
@@ -326,6 +326,19 @@ def run_engine(ticker: str, mode: str = "consistent"):
 
     asset_return = ((price / float(data["Close"].iloc[0])) - 1) * 100
 
+    custom_return = None
+
+    if custom_start:
+        try:
+           custom_date = pd.to_datetime(custom_start)
+           custom_data = data[data.index >= custom_date]
+
+           if not custom_data.empty:
+               start_price = float(custom_data["Close"].iloc[0])
+               custom_return = ((price / start_price) - 1) * 100
+        except Exception:
+            custom_return = None
+
     if action == "LONG BIAS":
         psych_score = 72
         psych_meaning = "GREED"
@@ -389,6 +402,8 @@ def run_engine(ticker: str, mode: str = "consistent"):
         "psych_score": psych_score,
         "psych_meaning": psych_meaning,
         "asset_return": round(float(asset_return), 2),
+        "custom_return": round(float(custom_return), 2) if custom_return is not None else None,
+        "custom_start": custom_start,
         "backtest_return": round(backtest_return * 100, 2),
         "sharpe": round(sharpe, 2),
         "atr": round(atr, 2),
@@ -411,9 +426,9 @@ def run_engine(ticker: str, mode: str = "consistent"):
 
 
 @app.get("/signals")
-def get_signals(ticker: str, mode: str = "consistent"):
+def get_signals(ticker: str, mode: str = "consistent", custom_start: str = None):
     try:
-        return run_engine(ticker, mode)
+        return run_engine(ticker, mode, custom_start)
     except Exception as e:
         return {"error": str(e)}
 
