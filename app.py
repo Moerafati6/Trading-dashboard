@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import plotly.graph_objects as go
 import pandas as pd
+import re
 from datetime import datetime, timedelta, timezone
 from supabase import create_client
 
@@ -391,6 +392,8 @@ if not st.session_state.auth:
             st.error("Trial system is not connected yet.")
         elif not email_main:
             st.error("Enter your email first.")
+        elif not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email_main.strip().lower()):
+            st.error("Enter a valid email address.")
         else:
             active, expires_at = start_trial(email_main.strip().lower())
 
@@ -532,6 +535,14 @@ if run_single:
     gap:16px;
     margin-bottom:22px;
     ">
+
+    <div class="nexus-card" style="border-color:#94a3b8;">
+    🏛️<br>
+    <b>Stock Exchange</b><br>
+    <span style="font-size:30px;font-weight:900;color:#cbd5e1;">
+    {res["exchange"]}
+    </span>
+    </div>
 
     <div class="nexus-card" style="border-color:#a855f7;">
     🧠<br>
