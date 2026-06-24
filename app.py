@@ -3,6 +3,8 @@ import requests
 import plotly.graph_objects as go
 import pandas as pd
 import re
+import random
+import resend
 from datetime import datetime, timedelta, timezone
 from supabase import create_client
 
@@ -292,29 +294,57 @@ def check_subscriber(email):
     return bool(result.data)
 
 def send_trial_code(email):
-    try:
-        supabase.auth.sign_in_with_otp({
-            "email": email,
-            "options": {
-                "should_create_user": True
-            }
-        })
-        return True
-    except Exception as e:
-        st.error(f"Could not send verification code: {e}")
-        return False
+    code = str(random.randint(100000, 999999))
+    expires = utc_now() + timedelta(minutes=10)
+
+    supabase.table("trial_codes").upsert({
+        "email": email,
+        "code": code,
+        "expires_at": expires.isoformat(),
+        "used": False
+    }).execute()
+
+    resend.api_key = st.secrets.get("RESEND_API_KEY")
+
+    resend.Emails.send({
+        "from": "Nexus Quantitative <onboarding@resend.dev>",
+        "to": email,
+        "subject": "Your Nexus verification code",
+        "html": f"""
+        <h2>Your Nexus Verification Code</h2>
+        <p>Your 6-digit code is:</p>
+        <h1>{code}</h1>
+        <p>This code expires in 10 minutes.</p>
+        """
+    })
+
+    return True
 
 
 def verify_trial_code(email, code):
-    try:
-        result = supabase.auth.verify_otp({
-            "email": email,
-            "token": code,
-            "type": "email"
-        })
-        return result.user is not None
-    except Exception:
+    result = (
+        supabase.table("trial_codes")
+        .select("*")
+        .eq("email", email)
+        .eq("code", code)
+        .eq("used", False)
+        .execute()
+    )
+
+    if not result.data:
         return False
+
+    row = result.data[0]
+    expires_at = datetime.fromisoformat(row["expires_at"].replace("Z", "+00:00"))
+
+    if expires_at < utc_now():
+        return False
+
+    supabase.table("trial_codes").update({
+        "used": True
+    }).eq("email", email).execute()
+
+    return True
 with st.sidebar:
     st.title("Nexus Terminal")
     st.caption("Quant.Rafati Signal Engine")
