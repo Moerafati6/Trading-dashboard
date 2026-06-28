@@ -325,6 +325,23 @@ def send_trial_code(email):
         st.error(f"Email failed to send. Check Resend domain/API key. Error: {e}")
         return False
 
+
+def verify_trial_code(email, code):
+    if not email or not code:
+        return False
+
+    result = (
+        supabase.table("trial_codes")
+        .select("*")
+        .eq("email", email)
+        .eq("code", code)
+        .eq("used", False)
+        .execute()
+    )
+
+    if not result.data:
+        return False
+
     row = result.data[0]
     expires_at = datetime.fromisoformat(row["expires_at"].replace("Z", "+00:00"))
 
