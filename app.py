@@ -304,34 +304,25 @@ def send_trial_code(email):
         "used": False
     }).execute()
 
-    resend.api_key = st.secrets.get("RESEND_API_KEY")
+    try:
+        resend.api_key = st.secrets.get("RESEND_API_KEY")
 
-    resend.Emails.send({
-        "from": "Nexus Quantitative <onboarding@resend.dev>",
-        "to": email,
-        "subject": "Your Nexus verification code",
-        "html": f"""
-        <h2>Your Nexus Verification Code</h2>
-        <p>Your 6-digit code is:</p>
-        <h1>{code}</h1>
-        <p>This code expires in 10 minutes.</p>
-        """
-    })
+        resend.Emails.send({
+            "from": "Nexus Quantitative <noreply@nexusquantitative.com>",
+            "to": email,
+            "subject": "Your Nexus verification code",
+            "html": f"""
+            <h2>Your Nexus Verification Code</h2>
+            <p>Your 6-digit code is:</p>
+            <h1>{code}</h1>
+            <p>This code expires in 10 minutes.</p>
+            """
+        })
 
-    return True
+        return True
 
-
-def verify_trial_code(email, code):
-    result = (
-        supabase.table("trial_codes")
-        .select("*")
-        .eq("email", email)
-        .eq("code", code)
-        .eq("used", False)
-        .execute()
-    )
-
-    if not result.data:
+    except Exception as e:
+        st.error(f"Email failed to send. Check Resend domain/API key. Error: {e}")
         return False
 
     row = result.data[0]
