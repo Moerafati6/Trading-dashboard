@@ -113,6 +113,16 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
         exchange = ticker_info.get("exchange", "N/A")
     except Exception:
         exchange = "N/A"
+    exchange_map = {
+        "NMS": "NASDAQ",
+        "NGM": "NASDAQ",
+        "NCM": "NASDAQ",
+        "NYQ": "NYSE",
+        "ASE": "NYSE American",
+        "PCX": "NYSE Arca",
+    }
+
+    exchange = exchange_map.get(exchange, exchange)
 
     if yf_ticker == "":
         return {"error": "Choose or search an asset first."}
