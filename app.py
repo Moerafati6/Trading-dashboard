@@ -307,7 +307,7 @@ def send_trial_code(email):
     resend.api_key = st.secrets.get("RESEND_API_KEY")
 
     resend.Emails.send({
-        "from": "Nexus Quantitative <noreply@nexusquantitative.com>",
+        "from": "Nexus Quantitative <onboarding@resend.dev>",
         "to": email,
         "subject": "Your Nexus verification code",
         "html": f"""
@@ -424,26 +424,30 @@ This tool is for systematic market analysis, not financial advice.
 if not st.session_state.auth:
     st.info("Start a free trial, subscribe, or enter your member email to access Nexus Terminal.")
 
-    st.markdown("### Already a member?")
+    st.markdown("### Already a member or active trial?")
+
     member_email = st.text_input(
-           "Member or Trial Email",
-           placeholder="Enter the email used for checkout or trial",
-           key="main_member_email"
+     "Member or Trial Email",
+     placeholder="Enter the email used for checkout or trial",
+     key="main_member_email"
     )
 
     if st.button("Access My Account", key="main_unlock"):
-           clean_email = member_email.strip().lower()
+        clean_email = member_email.strip().lower()
 
-    is_subscriber = check_subscriber(clean_email)
-    trial_active, trial_expires = check_trial(clean_email)
+        if not clean_email:
+            st.error("Enter your email first.")
+        else:
+            is_subscriber = check_subscriber(clean_email)
+            trial_active, trial_expires = check_trial(clean_email)
 
-    if is_subscriber or trial_active:
-        st.session_state.auth = True
-        st.session_state.user_email = clean_email
-        st.rerun()
-    else:
-        st.error("No active subscription or active trial found for this email.")
-
+            if is_subscriber or trial_active:
+                st.session_state.auth = True
+                st.session_state.user_email = clean_email
+                st.rerun()
+            else:
+                st.error("No active subscription or active trial found for this email.")
+   
     st.markdown("### Start your free trial")
 
     email_main = st.text_input(
