@@ -108,11 +108,24 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
     raw_ticker = ticker.strip()
     yf_ticker = ASSET_MAP.get(raw_ticker, raw_ticker).upper()
     exchange = "N/A"
+
     try:
-        ticker_info = yf.Ticker(yf_ticker).info
-        exchange = ticker_info.get("exchange", "N/A")
+       ticker_obj = yf.Ticker(yf_ticker)
+
+    # Try fast_info first
+       try:
+          exchange = ticker_obj.fast_info.get("exchange", "N/A")
+       except Exception:
+           exchange = "N/A"
+
+    # Fallback to info
+       if not exchange or exchange == "N/A":
+           ticker_info = ticker_obj.info
+           exchange = ticker_info.get("exchange", "N/A")
+
     except Exception:
         exchange = "N/A"
+
     exchange_map = {
         "NMS": "NASDAQ",
         "NGM": "NASDAQ",
@@ -120,10 +133,10 @@ def run_engine(ticker: str, mode: str = "consistent", custom_start: str = None):
         "NYQ": "NYSE",
         "ASE": "NYSE American",
         "PCX": "NYSE Arca",
+        "NAS": "NASDAQ",
     }
 
     exchange = exchange_map.get(exchange, exchange)
-
     if yf_ticker == "":
         return {"error": "Choose or search an asset first."}
 
