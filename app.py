@@ -658,7 +658,8 @@ if run_single:
         unsafe_allow_html=True
     )
     st.markdown("### Signal Dashboard")
-        # Exchange strip
+
+    # Stock exchange strip
     st.markdown(
         f"""
         <div class="nexus-card" style="
