@@ -329,12 +329,16 @@ def send_trial_code(email):
     code = str(random.randint(100000, 999999))
     expires = utc_now() + timedelta(minutes=10)
 
-    supabase.table("trial_codes").upsert({
-        "email": email,
-        "code": code,
-        "expires_at": expires.isoformat(),
-        "used": False
-    }).execute()
+    try:
+        supabase.table("trial_codes").upsert({
+            "email": email,
+            "code": code,
+            "expires_at": expires.isoformat(),
+            "used": False
+        }).execute()
+    except Exception as e:
+        st.error("Verification service is temporarily unavailable. Please try again shortly.")
+        return False
 
     try:
         resend.api_key = st.secrets.get("RESEND_API_KEY")
@@ -354,9 +358,8 @@ def send_trial_code(email):
         return True
 
     except Exception as e:
-        st.error(f"Email failed to send. Check Resend domain/API key. Error: {e}")
+        st.error("Verification email could not be sent. Please try again shortly.")
         return False
-
 
 def verify_trial_code(email, code):
     if not email or not code:
