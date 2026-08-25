@@ -681,120 +681,112 @@ if run_single:
         unsafe_allow_html=True
     )
 
-    # ROW 1 — PRICE SNAPSHOT
+        # ROW 1 — PRICE SNAPSHOT
     st.markdown(
         f"""
-        <div class="dashboard-row dashboard-row-3">
+<div class="dashboard-row dashboard-row-3">
+<div class="nexus-card" style="border-color:#22c55e;">
+💵<br>
+<b>Current Price</b><br>
+<span style="font-size:30px;font-weight:900;color:#ffffff;">
+${res["price"]}
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#22c55e;">
-                💵<br>
-                <b>Current Price</b><br>
-                <span style="font-size:30px;font-weight:900;color:#ffffff;">
-                    ${res["price"]}
-                </span>
-            </div>
+<div class="nexus-card" style="border-color:#facc15;">
+📈<br>
+<b>Daily Change</b><br>
+<span style="font-size:30px;font-weight:900;color:#facc15;">
+{res["daily_change"]}%
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#facc15;">
-                📈<br>
-                <b>Daily Change</b><br>
-                <span style="font-size:30px;font-weight:900;color:#facc15;">
-                    {res["daily_change"]}%
-                </span>
-            </div>
-
-            <div class="nexus-card" style="border-color:#facc15;">
-                ⭐<br>
-                <b>Nexus Setup Grade</b><br>
-                <span style="font-size:30px;font-weight:900;color:#facc15;">
-                    {res["nexus_grade"]}
-                </span><br>
-                <span style="font-size:14px;">
-                    {res["grade_summary"]}
-                    <br>
-                    <small>
-                        Grades the current setup, not long-term company value.
-                    </small>
-                </span>
-            </div>
-
-        </div>
-        """,
+<div class="nexus-card" style="border-color:#facc15;">
+⭐<br>
+<b>Nexus Setup Grade</b><br>
+<span style="font-size:30px;font-weight:900;color:#facc15;">
+{res["nexus_grade"]}
+</span><br>
+<span style="font-size:14px;">
+{res["grade_summary"]}
+<br>
+<small>Grades the current setup, not long-term company value.</small>
+</span>
+</div>
+</div>
+""",
         unsafe_allow_html=True
     )
 
-    # ROW 2 — MARKET ENVIRONMENT
+        # ROW 2 — MARKET ENVIRONMENT
     st.markdown(
         f"""
-        <div class="dashboard-row dashboard-row-3">
+<div class="dashboard-row dashboard-row-3">
+<div class="nexus-card" style="border-color:#a855f7;">
+🧠<br>
+<b>Market Sentiment</b><br>
+<span style="font-size:30px;font-weight:900;color:#d946ef;">
+{res["psych_meaning"]} ({res["psych_score"]})
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#a855f7;">
-                🧠<br>
-                <b>Market Sentiment</b><br>
-                <span style="font-size:30px;font-weight:900;color:#d946ef;">
-                    {res["psych_meaning"]} ({res["psych_score"]})
-                </span>
-            </div>
+<div class="nexus-card" style="border-color:#38bdf8;">
+🌊<br>
+<b>Volatility</b><br>
+<span style="font-size:30px;font-weight:900;color:#38bdf8;">
+{res["volatility_label"]} ({res["volatility_pct"]}%)
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#38bdf8;">
-                🌊<br>
-                <b>Volatility</b><br>
-                <span style="font-size:30px;font-weight:900;color:#38bdf8;">
-                    {res["volatility_label"]} ({res["volatility_pct"]}%)
-                </span>
-            </div>
-
-            <div class="nexus-card" style="border-color:#60a5fa;">
-                ℹ️<br>
-                <b>Market Regime</b><br>
-                <span style="font-size:30px;font-weight:900;color:#93c5fd;">
-                    {res["regime"]}
-                </span>
-            </div>
-
-        </div>
-        """,
+<div class="nexus-card" style="border-color:#60a5fa;">
+ℹ️<br>
+<b>Market Regime</b><br>
+<span style="font-size:30px;font-weight:900;color:#93c5fd;">
+{res["regime"]}
+</span>
+</div>
+</div>
+""",
         unsafe_allow_html=True
     )
 
-    # ROW 3 — RISK AND SETUP
+        # ROW 3 — RISK AND SETUP
     st.markdown(
         f"""
-        <div class="dashboard-row dashboard-row-4">
+<div class="dashboard-row dashboard-row-4">
+<div class="nexus-card" style="border-color:#3b82f6;">
+🛡️<br>
+<b>Risk-Adjusted Score</b><br>
+<span style="font-size:30px;font-weight:900;color:#38bdf8;">
+{res["sharpe"]}
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#3b82f6;">
-                🛡️<br>
-                <b>Risk-Adjusted Score</b><br>
-                <span style="font-size:30px;font-weight:900;color:#38bdf8;">
-                    {res["sharpe"]}
-                </span>
-            </div>
+<div class="nexus-card" style="border-color:#22c55e;">
+🎯<br>
+<b>Target Zone</b><br>
+<span style="font-size:30px;font-weight:900;color:#4ade80;">
+{res["take_profit"]}
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#22c55e;">
-                🎯<br>
-                <b>Target Zone</b><br>
-                <span style="font-size:30px;font-weight:900;color:#4ade80;">
-                    {res["take_profit"]}
-                </span>
-            </div>
+<div class="nexus-card" style="border-color:#ef4444;">
+⚠️<br>
+<b>Risk Zone</b><br>
+<span style="font-size:30px;font-weight:900;color:#f87171;">
+{res["stop_level"]}
+</span>
+</div>
 
-            <div class="nexus-card" style="border-color:#ef4444;">
-                ⚠️<br>
-                <b>Risk Zone</b><br>
-                <span style="font-size:30px;font-weight:900;color:#f87171;">
-                    {res["stop_level"]}
-                </span>
-            </div>
-
-            <div class="nexus-card" style="border-color:#f59e0b;">
-                ⚡<br>
-                <b>Confidence Score</b><br>
-                <span style="font-size:36px;font-weight:950;color:#fbbf24;">
-                    {res["confidence"]}%
-                </span>
-            </div>
-
-        </div>
-        """,
+<div class="nexus-card" style="border-color:#f59e0b;">
+⚡<br>
+<b>Confidence Score</b><br>
+<span style="font-size:36px;font-weight:950;color:#fbbf24;">
+{res["confidence"]}%
+</span>
+</div>
+</div>
+""",
         unsafe_allow_html=True
     )
     if res["action"] == "NEUTRAL/CHOPPY":
